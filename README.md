@@ -11,6 +11,10 @@ rdmseed.py: read miniseed file
 
 rdsac.py: read sac file
 
+specfem1d.py: python version specfem1d
+
+specfem2d.py: python version specfem2d
+
 tcas.py: python version tcas, translated astack/tcas.f
 
 vesp.py: vespagram
