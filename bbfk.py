@@ -12,22 +12,12 @@ exp=1
 wavenumber=0.02
 ssq=100
 
-def phaseshift():
+def phaseshift(iptr,ncurrent):
     #dbh/phaseshift.c/phaseshift()
     for i in range(nch):
-        x1=0
-        x2=0
-        x3=0
-        y1=0
-        y2=0
-        w1=0
-        w2=0
-        p1=0
-        p2=0
-        q1=0
-        q2=0
+        [x1,x2,x3,y1,y2,w1,w2,p1,p2,q1,q2]=qstates[i]
 
-        for j in range(nsamples):
+        for j in range(ncurrent):
             y=0.94167*(y2-x1)+x3
             output1=0.53239*(w2-y)+y2
             y2=y1
@@ -35,37 +25,34 @@ def phaseshift():
             w2=w1
             w1=output1
 
-            p=0.186540*(p2-st[i].data[j])+x2
+            p=0.186540*(p2-st[i].data[iptr+j])+x2
             output2=0.7902015*(q2-p)+p2
             p2=p1
             p1=p
             q2=q1
             q1=output2
 
-            output[i][j]=output1+1j*output2
-
             x3=x2
             x2=x1
-            x1=st[i].data[j]
+            x1=st[i].data[iptr+j]
+
+            output[i][j]=output1+1j*output2
+
+        qstates[i]=[x1,x2,x3,y1,y2,w1,w2,p1,p2,q1,q2]
 
 def covmat():
     #fks/xbbfk.c/covmat()
     decrate=2
 
-    phaseshift()
-
     for iptr in range(0,nsamples,100): #100 samples window로 끊어서 scm 계산한 뒤 합
-        if nsamples-iptr<100:
-            ncurrent=nsamples-iptr
-        else:
-            ncurrent=100
-
+        ncurrent=min(nsamples-iptr,100)
+        phaseshift(iptr=iptr,ncurrent=ncurrent)
         for i in range(nch):
             for j in range(nch):
-                x=output[i][iptr+1:iptr+ncurrent:decrate] #1/2 desample
-                y=output[j][iptr+1:iptr+ncurrent:decrate]
+                x=output[i][1:ncurrent:decrate] #1/2 desample
+                y=output[j][1:ncurrent:decrate]
                 c=x*np.conjugate(y)
-                scm[i][j]+=sum(c)
+                scm[j][i]+=sum(c)
 
 def normalize():
     trace=np.real(np.trace(scm))
@@ -80,7 +67,7 @@ def regularize():
     trace=np.real(np.trace(scm))
     offset=trace*eps/nch
     for i in range(nch):
-        scm[i][i]*=offset
+        scm[i][i]+=offset
 
 def mlm():
     #fks/xbbfk.c/eigenanal()
@@ -102,8 +89,8 @@ def fkevalr():
     wv=np.linspace(-2*np.pi*wavenumber,2*np.pi*wavenumber,ssq)
     for i in range(ssq):
         for j in range(ssq):
-            tmp=np.matmul(np.exp(1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1])),scm)
-            fks[i][j]=np.real(np.matmul(tmp,np.exp(-1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1]))))
+            tmp=np.matmul(np.exp(-1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1])),scm)
+            fks[i][j]=np.real(np.matmul(tmp,np.exp(1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1]))))
 
 #main
 st=read(pathname_or_url="sacdata/*",format="SAC",byteorder="little")
@@ -128,9 +115,10 @@ geometry=geometry[:-1]
 _,_,baz=gps2dist_azimuth(st[0].stats.sac.evla,st[0].stats.sac.evlo,center[1],center[0])
 baz*=np.pi/180
 
-output=np.empty((nch,nsamples),dtype=complex)
+output=np.empty((nch,100),dtype=complex)
 scm=np.zeros((nch,nch),dtype=complex)
 fks=np.empty((ssq,ssq))
+qstates=np.zeros((nch,11))
 
 covmat()
 scm=music()
