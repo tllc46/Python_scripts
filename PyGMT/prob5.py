@@ -1,12 +1,14 @@
+import numpy as np
 import pandas as pd
 from obspy.geodetics import gps2dist_azimuth
 import pygmt
 
 #calculate baz
 df=pd.read_csv(filepath_or_buffer="traveltime_residuals.txt",sep=" ")
+longitude_center,latitude_center=np.average(a=df[["longitude","latitude"]],axis=0)
+gca,az,baz=gps2dist_azimuth(lat1=-12.0989,lon1=166.5894,lat2=latitude_center,lon2=longitude_center)
 df_O=df.loc[df["status"].isin(["O"]),["longitude","latitude","residual"]]
 df_O["size"]=2*abs(df_O.loc[:,"residual"])+0.1
-gca,az,baz=gps2dist_azimuth(lat1=-12.0989,lon1=166.5894,lat2=np.average(df["latitude"]),lon2=np.average(df["longitude"]))
 
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
