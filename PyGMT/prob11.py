@@ -35,4 +35,4 @@ profile=pygmt.project(data=df.loc[:,["longitude","latitude","depth","magnitude"]
 fig.shift_origin(yshift=f"-{y_shift}c")
 fig.plot(x=profile[4],y=profile[2],size=0.05*profile[3],frame=["WrS","x0.5","x+ldistance(@.)","ya10f5","y+ldepth(km)"],projection=f"xy/6c/-{depth_scale}c",region=[0,track.iloc[-1,2],0,depth_max],style="cc",pen="red")
 fig.plot(x=profile.loc[profile[3].isin([5.1,5.8,5.4]),4],y=profile.loc[profile[3].isin([5.1,5.8,5.4]),2],size=0.05*profile.loc[profile[3].isin([5.1,5.8,5.4]),3],style="cc",pen="black")
-fig.savefig(fname="prob10.png")
+fig.savefig(fname="prob11.png")
