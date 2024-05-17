@@ -6,10 +6,12 @@ radius_scale=0.05 #cm/r
 horizon=120 #degree
 radius_len=90*radius_scale #aeqd's center of projection corresponds to oblique latitude 90
 
+#calculate center of stations
 df_stations=pd.read_csv(filepath_or_buffer="stations.txt",sep=" ")
 latitude_center=np.average(df_stations["latitude"])
 longitude_center=np.average(df_stations["longitude"])
 df_events=pd.read_csv(filepath_or_buffer="events.txt",sep=" ")
+
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="+D")
 fig.coast(land="whitesmoke",projection=f"aeqd/{longitude_center}/{latitude_center}/{horizon}/{radius_len}/0",region="g",water="darkgray")
