@@ -20,7 +20,7 @@ y_shift=(height_min*height_scale-depth_min*depth_scale)*math.cos(math.radians(x_
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D")
 #depth plot
-grid_latitude=pygmt.xyz2grd(data="grid2dvew.z",spacing=["703+n","145+n"],region=[x_min,x_max,depth_min+depth_radius_val,0.6+depth_radius_val],convention="LB")
+grid_latitude=pygmt.xyz2grd(data="latitude_33.35.txt",spacing=["703+n","145+n"],region=[x_min,x_max,depth_min+depth_radius_val,0.6+depth_radius_val],convention="LB")
 pygmt.makecpt(cmap="polar",reverse=True,series=[-0.3,0.3])
 fig.grdimage(grid=grid_latitude,frame=["WrS","xa1f0.2","y5","y+lDepth(km)"],projection=f"polar/{depth_scale}c+a+t{x_center}+z")
 fig.text(position="CB",text="Longitude",font="12p",justify="CT",offset="j0c/0.5c",no_clip=True)
