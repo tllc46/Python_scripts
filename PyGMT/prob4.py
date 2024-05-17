@@ -4,7 +4,7 @@ import pygmt
 
 radius_scale=0.05 #cm/r
 horizon=120 #degree
-radius_len=90*radius_scale #aeqd's projection center's oblique latitude is 90
+radius_len=90*radius_scale #aeqd's center of projection corresponds to oblique latitude 90
 
 df_stations=pd.read_csv(filepath_or_buffer="stations.txt",sep=" ")
 latitude_center=np.average(df_stations["latitude"])
