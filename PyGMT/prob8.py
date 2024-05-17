@@ -6,7 +6,7 @@ elevation=20
 depth_max=60
 depth_scale=0.4
 
-y_shift=60*depth_scale*np.cos(elevation*np.pi/180)
+y_shift=depth_max*depth_scale*np.cos(elevation*np.pi/180)
 
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
