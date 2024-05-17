@@ -8,7 +8,7 @@ x_center=0.5*(x_min+x_max) #degree
 depth_min=-65.4 #km
 depth_scale=0.075 #cm/km
 depth_radius_val=6371.007 #km
-radius_len=depth_scale*depth_radius_val #cm
+radius_len=depth_radius_val*depth_scale #cm
 
 height_min=-0.5 #km
 height_max=2 #km
