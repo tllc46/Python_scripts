@@ -1,18 +1,18 @@
 import pandas as pd
 import pygmt
 
-df=pd.read_csv(filepath_or_buffer="KMA_events.txt",sep=" ")
-df_size=df[["longitude","latitude","magnitude"]]
-df_size_big=df_size.loc[df_size["magnitude"].isin([5.1,5.8,5.4])]
-df_size.loc[:,"magnitude"]*=0.05
-df_size_big.loc[:,"magnitude"]*=0.05
-
 lon_1=129.05
 lat_1=35.55
 lon_2=129.9
 lat_2=37
 lon_center=0.5*(lon_1+lon_2)
 lat_center=0.5*(lat_1+lat_2)
+
+df=pd.read_csv(filepath_or_buffer="KMA_events.txt",sep=" ")
+df_size=df[["longitude","latitude","magnitude"]]
+df_size_big=df_size.loc[df_size["magnitude"].isin([5.1,5.8,5.4])]
+df_size.loc[:,"magnitude"]*=0.05
+df_size_big.loc[:,"magnitude"]*=0.05
 
 depth_scale=0.1 #cm/km
 depth_max=25 #km
