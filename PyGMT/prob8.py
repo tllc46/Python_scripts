@@ -1,4 +1,4 @@
-import numpy as np
+import math
 import pygmt
 
 elevation=20
@@ -6,7 +6,7 @@ elevation=20
 depth_max=60
 depth_scale=0.4
 
-y_shift=depth_max*depth_scale*np.cos(elevation*np.pi/180)
+y_shift=depth_max*depth_scale*math.cos(math.radians(elevation))
 
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
