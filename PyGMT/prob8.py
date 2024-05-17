@@ -25,7 +25,7 @@ fig.coast(projection="z",shorelines=True,perspective=True)
 fig.grdimage(grid=grid_15,frame="lrbt",projection="z",perspective=[150,elevation,45])
 fig.coast(projection="z",shorelines=True,perspective=True)
 fig.basemap(frame=["lrbtZ+b","z15","z+ldepth (km)"],region=[125.62,127.5115,32.8565,33.95,-depth_max,0],perspective=[150,elevation])
-fig.colorbar(frame=[0.1,"x+ldVp (km/s)"],position="JCB+w8c/0.4c")
+fig.colorbar(frame=[0.1,"x+ldVp (km/s)"],position="JCB+w8c")
 
 #elevation plot
 grid=pygmt.datasets.load_earth_relief(resolution="01m",region=[125.6,127.6,32.8,33.95])
