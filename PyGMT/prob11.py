@@ -26,7 +26,7 @@ fig.plot(x=[lon_1,lon_2],y=[lat_1,lat_2],pen="0.75p,blue")
 fig.plot(data=df_size,style="cc",pen="red")
 fig.plot(data=df_size_big,style="cc",pen="black")
 
-#elevation plot
+#height plot
 grid=pygmt.datasets.load_earth_relief(resolution="01m",region=[129,130,35,38])
 track=pygmt.grdtrack(grid=grid,profile=f"{lon_1}/{lat_1}/{lon_2}/{lat_2}+d+i0.01d")
 track=track[[2,3]]
