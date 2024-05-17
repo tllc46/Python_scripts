@@ -1,7 +1,7 @@
 import pandas as pd
 import pygmt
 
-      #event longitude,event latitude,stike,dip,rake,magnitude,plot longitude,plot latitude,text
+      #event longitude,event latitude,depth,stike,dip,rake,magnitude,plot longitude,plot latitude,text
 data=[[129.19,35.77,15,27,71,-179,5.1,128.4,35.5,"2016-09-12T19:44:32"],
       [129.19,35.76,15,24,70,171,5.8,128.5,36.1,"2016-09-12T20:32:54"],
       [129.37,36.11,7,214,51,128,5.4,129.1,36.7,"2017-11-15T14:29:31"]]
