@@ -2,6 +2,7 @@ import pandas as pd
 import pygmt
 
 df=pd.read_csv(filepath_or_buffer="stations.txt",sep=" ")
+
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D")
 grid=pygmt.datasets.load_earth_relief(resolution="03s",region=[126.1,127,33.15,33.6])
