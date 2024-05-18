@@ -8,8 +8,8 @@ df["magnitude"]*=0.05
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D")
 region=pygmt.info(data=df[["longitude","latitude"]],spacing=1)
-color_range=pygmt.info(data=df["depth"],nearest_multiple=5)[:2]
-pygmt.makecpt(cmap="inferno",reverse=True,series=color_range)
+series=pygmt.info(data=df["depth"],nearest_multiple=5)[:2]
+pygmt.makecpt(cmap="inferno",reverse=True,series=series)
 fig.coast(frame=["WeSn",2],land="gray",projection="merc/1.5c",region=region)
 fig.plot(data="faults.txt",pen="darkolivegreen")
 fig.plot(data=df,cmap=True,style="cc",pen="+cl")
