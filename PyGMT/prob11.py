@@ -31,9 +31,9 @@ grid=pygmt.datasets.load_earth_relief(resolution="01m",region=[129,130,35,38])
 track=pygmt.grdtrack(grid=grid,profile=f"{lon_1}/{lat_1}/{lon_2}/{lat_2}+d+i0.01d")
 track=track[[2,3]]
 track[3]*=0.001
-height_range=pygmt.info(data=track[3],nearest_multiple=0.2)[:2]
+height_min,height_max=pygmt.info(data=track[3],nearest_multiple=0.2)[:2]
 fig.shift_origin(xshift="0.3c",yshift="-2c")
-fig.plot(x=[0,track.iloc[-1,0]],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue",projection="xy/6c/0.5c",close="+yb",region=[0,track.iloc[-1,0],height_range[0],height_range[1]])
+fig.plot(x=[0,track.iloc[-1,0]],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue",projection="xy/6c/0.5c",close="+yb",region=[0,track.iloc[-1,0],height_min,height_max])
 fig.plot(data=track,fill="black",close="+yb")
 
 #depth plot
