@@ -14,8 +14,8 @@ fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
 #main plot
 fig.coast(frame=["WeSn","xa0.2-0.1f0.1","y0.15"],projection="merc/10c",region=[126.1,127,33.15,33.6],shorelines=True)
-color_range=pygmt.info(data=df["residual"],nearest_multiple=0.05)[:2]
-pygmt.makecpt(cmap="polar",series=color_range)
+series=pygmt.info(data=df["residual"],nearest_multiple=0.05)[:2]
+pygmt.makecpt(cmap="polar",series=series)
 fig.plot(data=df_O,cmap=True,style="cc",pen=True)
 fig.plot(data=df.loc[df["status"].isin(["X"]),["longitude","latitude"]],style="+0.15c")
 fig.text(x=df["longitude"],y=df["latitude"],text=df["name"],font="5p",justify="RB",offset="j0.1c",fill="white@40")
