@@ -3,7 +3,7 @@ import pygmt
 
 df=pd.read_csv(filepath_or_buffer="KMA_events.txt",sep=" ")
 df=df[["longitude","latitude","depth","magnitude"]]
-df.loc[:,"magnitude"]*=0.05
+df["magnitude"]*=0.05
 
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D")
