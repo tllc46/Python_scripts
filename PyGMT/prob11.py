@@ -31,9 +31,10 @@ grid=pygmt.datasets.load_earth_relief(resolution="01m",region=[129,130,35,38])
 track=pygmt.grdtrack(grid=grid,profile=f"{lon_1}/{lat_1}/{lon_2}/{lat_2}+d+i0.01d")
 track=track[[2,3]]
 track[3]*=0.001
+x_max=track.iloc[-1,0]
 y_min,y_max=pygmt.info(data=track[3],nearest_multiple=0.2)[:2]
 fig.shift_origin(xshift="0.3c",yshift="-2c")
-fig.plot(x=[0,track.iloc[-1,0]],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue",projection="xy/6c/0.5c",close="+yb",region=[0,track.iloc[-1,0],y_min,y_max])
+fig.plot(x=[0,x_max],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue",projection="xy/6c/0.5c",close="+yb",region=[0,x_max,y_min,y_max])
 fig.plot(data=track,fill="black",close="+yb")
 
 #depth plot
@@ -43,6 +44,6 @@ profile_size_big=profile_size.loc[profile_size[3].isin([5.1,5.8,5.4])]
 profile_size[3]*=0.05
 profile_size_big[3]*=0.05
 fig.shift_origin(yshift=f"-{y_shift}c")
-fig.plot(data=profile_size,frame=["WrS","x0.5","x+ldistance(@.)","ya10f5","y+ldepth(km)"],projection=f"xy/6c/-{depth_scale}c",region=[0,track.iloc[-1,0],0,depth_max],style="cc",pen="red")
+fig.plot(data=profile_size,frame=["WrS","x0.5","x+ldistance(@.)","ya10f5","y+ldepth(km)"],projection=f"xy/6c/-{depth_scale}c",region=[0,x_max,0,depth_max],style="cc",pen="red")
 fig.plot(data=profile_size_big,style="cc",pen="black")
 fig.savefig(fname="prob11.png")
