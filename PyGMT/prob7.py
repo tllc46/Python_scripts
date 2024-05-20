@@ -21,7 +21,9 @@ fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D")
 #depth plot
 grid=pygmt.xyz2grd(data="latitude_33.35.txt",spacing=["703+n","145+n"],region=[x_min,x_max,depth_min+depth_radius_val,0.6+depth_radius_val],convention="LB")
-pygmt.makecpt(cmap="polar",reverse=True,series=[-0.3,0.3])
+series=pygmt.grdinfo(grid=grid,nearest_multiple="0.05+s")
+series=series[2:-1].split(sep="/")[:2]
+pygmt.makecpt(cmap="polar",reverse=True,series=series)
 fig.grdimage(grid=grid,frame=["WrS","xa1f0.2","y5","y+lDepth(km)"],projection=f"polar/{depth_scale}c+a+t{x_center}+z")
 fig.text(position="CB",text="Longitude",font="12p",justify="CT",offset="j0c/0.5c",no_clip=True)
 fig.colorbar(frame=[0.1,"x+ldVp (km/s)"],position="JCB+w6c+o0c/1.5c")
