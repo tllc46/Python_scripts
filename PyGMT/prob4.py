@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pygmt
 
@@ -7,7 +6,7 @@ radius_len=90*radius_scale #aeqd's center of projection corresponds to oblique l
 
 #calculate center of stations
 df_stations=pd.read_csv(filepath_or_buffer="stations.txt",sep=" ")
-longitude_center,latitude_center=np.average(a=df_stations[["longitude","latitude"]],axis=0)
+longitude_center,latitude_center=df_stations[["longitude","latitude"]].mean()
 df=pd.read_csv(filepath_or_buffer="events.txt",sep=" ")
 
 fig=pygmt.Figure()
