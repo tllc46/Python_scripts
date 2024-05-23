@@ -5,7 +5,7 @@ import pygmt
 
 #calculate baz
 df=pd.read_csv(filepath_or_buffer="traveltime_residuals.txt",sep=" ")
-longitude_center,latitude_center=np.average(a=df[["longitude","latitude"]],axis=0)
+longitude_center,latitude_center=df_stations[["longitude","latitude"]].mean()
 gca,az,baz=gps2dist_azimuth(lat1=-12.0989,lon1=166.5894,lat2=latitude_center,lon2=longitude_center)
 df_O=df.loc[df["status"].isin(["O"]),["longitude","latitude","residual"]]
 df_O["size"]=2*abs(df_O["residual"])+0.1
