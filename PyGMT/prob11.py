@@ -11,8 +11,8 @@ lat_center=0.5*(lat_1+lat_2)
 df=pd.read_csv(filepath_or_buffer="KMA_events.txt",sep=" ")
 df_size=df[["longitude","latitude","magnitude"]]
 df_size_big=df_size.loc[df_size["magnitude"].isin([5.1,5.8,5.4])]
-df_size["magnitude"]*=0.05
-df_size_big["magnitude"]*=0.05
+df_size.loc[:,"magnitude"]*=0.05
+df_size_big.loc[:,"magnitude"]*=0.05
 
 depth_scale=0.1 #cm/km
 depth_max=25 #km
@@ -40,8 +40,8 @@ fig.plot(data=track,fill="black",close="+yb")
 profile=pygmt.project(data=df[["longitude","latitude","depth","magnitude"]],center=[lon_1,lat_1],endpoint=[lon_2,lat_2],width=[-0.2,0.2])
 profile_size=profile[[4,2,3]]
 profile_size_big=profile_size.loc[profile_size[3].isin([5.1,5.8,5.4])]
-profile_size[3]*=0.05
-profile_size_big[3]*=0.05
+profile_size.loc[:,3]*=0.05
+profile_size_big.loc[:,3]*=0.05
 region[2:]=pygmt.info(data=profile[2],nearest_multiple=5)[:2]
 fig.shift_origin(yshift=f"-{y_shift}c")
 fig.plot(data=profile_size,frame=["WrS","x0.5","x+ldistance(@.)","ya10f5","y+ldepth(km)"],projection=f"xy/6c/-{depth_scale}c",region=region,style="cc",pen="red")
