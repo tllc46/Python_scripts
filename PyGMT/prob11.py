@@ -33,7 +33,7 @@ track=track[[2,3]]
 track[3]*=0.001
 region=pygmt.info(data=track,spacing=[0,0.2])
 fig.shift_origin(xshift="0.3c",yshift="-2c")
-fig.plot(x=[0,x_max],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue",projection="xy/6c/0.5c",close="+yb",region=region)
+fig.plot(x=region[:2],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue",projection="xy/6c/0.5c",close="+yb",region=region)
 fig.plot(data=track,fill="black",close="+yb")
 
 #depth plot
