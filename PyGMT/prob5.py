@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from obspy.geodetics import gps2dist_azimuth
 import pygmt
