@@ -3,10 +3,10 @@ import pygmt
 
 elevation=20
 
-depth_max=60
-depth_scale=0.4
+depth_max=60 #km
+depth_scale=0.4 #cm/km
 
-y_shift=depth_max*depth_scale*math.cos(math.radians(elevation))
+y_shift=depth_max*depth_scale*math.cos(math.radians(elevation)) #cm
 
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
