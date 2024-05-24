@@ -2,7 +2,7 @@ import pandas as pd
 import pygmt
 
 radius_scale=0.05 #cm/r
-radius_len=90*radius_scale #aeqd's center of projection corresponds to oblique latitude 90
+radius_len=90*radius_scale #cm, aeqd's center of projection corresponds to oblique latitude 90
 
 #calculate center of stations
 df_stations=pd.read_csv(filepath_or_buffer="stations.txt",sep=" ")
