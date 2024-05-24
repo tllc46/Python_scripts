@@ -1,13 +1,6 @@
 import pandas as pd
 import pygmt
 
-lon_1=129.05
-lat_1=35.55
-lon_2=129.9
-lat_2=37
-lon_center=0.5*(lon_1+lon_2)
-lat_center=0.5*(lat_1+lat_2)
-
 df=pd.read_csv(filepath_or_buffer="KMA_events.txt",sep=" ")
 df_size=df[["longitude","latitude","magnitude"]]
 df_size_big=df_size.loc[df_size["magnitude"].isin([5.1,5.8,5.4])]
@@ -21,14 +14,14 @@ y_shift=depth_max*depth_scale #cm
 fig=pygmt.Figure()
 pygmt.config(FONT_ANNOT_PRIMARY="6p",FONT_LABEL="8p",FORMAT_GEO_MAP="D")
 #map plot
-fig.coast(frame="ag",land="gray",projection=f"omerc/{lon_center}/{lat_center}/{lon_2}/{lat_2}/6c",region=[-0.85,0.85,-0.2,0.2])
-fig.plot(x=[lon_1,lon_2],y=[lat_1,lat_2],pen="0.75p,blue")
+fig.coast(frame="ag",land="gray",projection="omerc/129.05/35.55/129.9/37/6c",region=[-0.05,1.65,-0.2,0.2])
+fig.plot(x=[129.05,129.9],y=[35.55,37],pen="0.75p,blue")
 fig.plot(data=df_size,style="cc",pen="red")
 fig.plot(data=df_size_big,style="cc",pen="black")
 
 #height plot
 grid=pygmt.datasets.load_earth_relief(resolution="01m",region=[129,130,35,38])
-track=pygmt.grdtrack(grid=grid,profile=f"{lon_1}/{lat_1}/{lon_2}/{lat_2}+d+i0.01d")
+track=pygmt.grdtrack(grid=grid,profile="129.05/35.55/129.9/37+d+i0.01d")
 track=track[[2,3]]
 track[3]*=0.001
 region=pygmt.info(data=track,spacing=[0,0.2])
@@ -37,7 +30,7 @@ fig.plot(x=region[:2],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue
 fig.plot(data=track,fill="black",close="+yb")
 
 #depth plot
-profile=pygmt.project(data=df[["longitude","latitude","depth","magnitude"]],center=[lon_1,lat_1],endpoint=[lon_2,lat_2],width=[-0.2,0.2])
+profile=pygmt.project(data=df[["longitude","latitude","depth","magnitude"]],center=[129.05,35.55],endpoint=[129.9,37],width=[-0.2,0.2])
 profile_size=profile[[4,2,3]]
 profile_size_big=profile_size.loc[profile_size[3].isin([5.1,5.8,5.4])]
 profile_size.loc[:,3]*=0.05
