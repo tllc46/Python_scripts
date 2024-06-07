@@ -27,7 +27,7 @@ fig.plot(x=region[:2],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue
 fig.plot(x=track[2],y=track[3],fill="black",close="+yb")
 
 #depth plot
-profile=pygmt.project(x=df["longitude"],y=df["latitude"],z=df[["depth","magnitude"]],center=[129.05,35.55],endpoint=[129.9,37],width=[-0.2,0.2])
+profile=pygmt.project(data=df[["longitude","latitude","depth","magnitude"]],center=[129.05,35.55],endpoint=[129.9,37],width=[-0.2,0.2])
 profile_big=profile.loc[profile[3].isin([5.1,5.8,5.4])]
 region[2:]=pygmt.info(data=profile[2],nearest_multiple=5)[:2]
 fig.shift_origin(yshift=f"-{y_shift}c")
