@@ -19,10 +19,12 @@ fig.plot(x=df_big["longitude"],y=df_big["latitude"],size=0.05*df_big["magnitude"
 #height plot
 grid=pygmt.datasets.load_earth_relief(resolution="01m",region=[129,130,35,38])
 track=pygmt.grdtrack(grid=grid,profile="129.05/35.55/129.9/37+d+i0.01d")
+track=track[[2,3]]
+track[3]*=0.001
 region=pygmt.info(data=track,spacing=[0,0.2])
 fig.shift_origin(xshift="0.3c",yshift="-2c")
 fig.plot(x=region[:2],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue",projection="xy/6c/0.5c",close="+yb",region=region)
-fig.plot(x=track[2],y=0.001*track[3],fill="black",close="+yb")
+fig.plot(x=track[2],y=track[3],fill="black",close="+yb")
 
 #depth plot
 profile=pygmt.project(data=df[["longitude","latitude","depth","magnitude"]],center=[129.05,35.55],endpoint=[129.9,37],width=[-0.2,0.2])
