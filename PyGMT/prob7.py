@@ -31,10 +31,8 @@ fig.colorbar(frame=[0.1,"x+ldVp (km/s)"],position="JCB+w6c+o0c/1.5c")
 #height plot
 grid_relief=pygmt.datasets.load_earth_relief(resolution="01m",region=[125.6,127.6,32.8,33.95])
 track=pygmt.grdtrack(grid=grid_relief,profile=f"{x_min}/33.35/{x_max}/33.35+d+i0.01d")
-track=track[[0,3]]
-track[3]=0.001*track[3]+height_radius_val
 fig.shift_origin(yshift=f"{y_shift}c")
 fig.plot(x=[x_min,x_max],y=[height_radius_val,height_radius_val],frame="+gwhite",fill="lightblue",projection=f"polar/{height_scale}c+a+t{x_center}",close="+yb",region=[x_min,x_max,height_radius_val+height_min,height_radius_val+height_max])
-fig.plot(data=track,fill="black",close="+yb")
+fig.plot(x=track[0],y=0.001*track[3]+height_radius_val,fill="black",close="+yb")
 fig.basemap(frame=["lEt","y1","y+lHeight(km)"],projection=f"polar/{height_scale}c+a+r{radius_len}+t{x_center}",region=[x_min,x_max,height_min,height_max])
 fig.savefig(fname="prob7.png")
