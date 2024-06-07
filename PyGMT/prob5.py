@@ -6,8 +6,8 @@ import pygmt
 df=pd.read_csv(filepath_or_buffer="traveltime_residuals.txt",sep=" ")
 longitude_center,latitude_center=df_stations[["longitude","latitude"]].mean()
 gca,az,baz=gps2dist_azimuth(lat1=-12.0989,lon1=166.5894,lat2=latitude_center,lon2=longitude_center)
-df_O=df.loc[df["status"].isin(["O"]),["longitude","latitude","residual"]]
-df_O["size"]=2*abs(df_O["residual"])+0.1
+df_O=df.loc[df["status"].isin(["O"])]
+df_X=df.loc[df["status"].isin(["X"])]
 
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
@@ -15,8 +15,8 @@ pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
 fig.coast(frame=["WeSn","xa0.2-0.1f0.1","y0.15"],projection="merc/10c",region=[126.1,127,33.15,33.6],shorelines=True)
 series=pygmt.info(data=df["residual"],nearest_multiple=0.05)[:2]
 pygmt.makecpt(cmap="polar",series=series)
-fig.plot(data=df_O,cmap=True,style="cc",pen=True)
-fig.plot(data=df.loc[df["status"].isin(["X"]),["longitude","latitude"]],style="+0.15c")
+fig.plot(x=df_O["longitude"],y=df_O["latitude"],size=2*abs(df_O["residual"])+0.1,cmap=True,fill=df_O["residual"],style="cc",pen=True)
+fig.plot(x=df_X["longitude"],y=df_X["latitude"],style="+0.15c")
 fig.text(x=df["longitude"],y=df["latitude"],text=df["name"],font="5p",justify="RB",offset="j0.1c",fill="white@40")
 fig.colorbar(frame=[0.05,"x+lresidual (s)"],position="JCB+w4c")
 
