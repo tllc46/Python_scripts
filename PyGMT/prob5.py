@@ -4,10 +4,11 @@ import pygmt
 
 #calculate baz
 df=pd.read_csv(filepath_or_buffer="traveltime_residuals.txt",sep=" ")
-longitude_center,latitude_center=df_stations[["longitude","latitude"]].mean()
-gca,az,baz=gps2dist_azimuth(lat1=-12.0989,lon1=166.5894,lat2=latitude_center,lon2=longitude_center)
 df_O=df.loc[df["status"].isin(["O"])]
 df_X=df.loc[df["status"].isin(["X"])]
+df_stations=pd.read_csv(filepath_or_buffer="stations.txt",sep=" ")
+longitude_center,latitude_center=df_stations[["longitude","latitude"]].mean()
+gca,az,baz=gps2dist_azimuth(lat1=-12.0989,lon1=166.5894,lat2=latitude_center,lon2=longitude_center)
 
 fig=pygmt.Figure()
 pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
