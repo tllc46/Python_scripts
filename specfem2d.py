@@ -68,11 +68,11 @@ seismogram=[]
 
 def endw1(n,alpha,beta): #xi=-1 end point weight
     #important: n must be no. of gll points (ngll) - 1, consistent with Fortran code
-    return 2**(alpha+beta+1)*(beta+1)*gamma(beta+1)**2*gamma(n)*gamma(n+alpha+1)/(gamma(n+beta+1)*gamma(n+alpha+beta+2))
+    return 2**(alpha+beta+1)*(beta+1)*gamma(z=beta+1)**2*gamma(z=n)*gamma(z=n+alpha+1)/(gamma(z=n+beta+1)*gamma(z=n+alpha+beta+2))
 
 def endw2(n,alpha,beta): #xi=1 end point weight
     #important: n must be no. of gll points (ngll) - 1, consistent with Fortran code
-    return 2**(alpha+beta+1)*(alpha+1)*gamma(alpha+1)**2*gamma(n)*gamma(n+beta+1)/(gamma(n+alpha+1)*gamma(n+alpha+beta+2))
+    return 2**(alpha+beta+1)*(alpha+1)*gamma(z=alpha+1)**2*gamma(z=n)*gamma(z=n+beta+1)/(gamma(z=n+alpha+1)*gamma(z=n+alpha+beta+2))
 
 def zwgljd(n,alpha,beta): #zeros and weights of glj points
     z,w=roots_jacobi(n=n-2,alpha=alpha+1,beta=beta+1) #zeros, weights
@@ -95,7 +95,7 @@ def define_derivation_matrices(zgll,ngll):
         elif i==j and 0<i and 0<j:
             hprime.append(0)
         else:
-            hprime.append(eval_legendre(ngll-1,zgll[i])/(eval_legendre(ngll-1,zgll[j])*(zgll[i]-zgll[j]))) #l_j'(xi_i)
+            hprime.append(eval_legendre(n=ngll-1,x=zgll[i])/(eval_legendre(n=ngll-1,x=zgll[j])*(zgll[i]-zgll[j]))) #l_j'(xi_i)
         index+=1
 
     if ngll%2: #ngll is odd
