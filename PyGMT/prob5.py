@@ -15,7 +15,8 @@ pygmt.config(FORMAT_GEO_MAP="D",MAP_FRAME_TYPE="plain")
 #main plot
 fig.coast(frame=["WeSn","xa0.2-0.1f0.1","y0.15"],projection="merc/10c",region=[126.1,127,33.15,33.6],shorelines=True)
 series=pygmt.info(data=df["residual"],nearest_multiple=0.05)[:2]
-pygmt.makecpt(cmap="polar",series=series)
+t_max=max(abs(series))
+pygmt.makecpt(cmap="polar",series=[-t_max,t_max])
 fig.plot(x=df_O["longitude"],y=df_O["latitude"],size=2*abs(df_O["residual"])+0.1,cmap=True,fill=df_O["residual"],style="cc",pen=True)
 fig.plot(x=df_X["longitude"],y=df_X["latitude"],style="+0.15c")
 fig.text(x=df["longitude"],y=df["latitude"],text=df["name"],font="5p",justify="RB",offset="j0.1c",fill="white@40")
