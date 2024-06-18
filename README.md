@@ -1,4 +1,8 @@
 # python_scripts
+Fourier_Trans: Changeop Park's FT lecture
+
+PyGMT: PyGMT problems
+
 FE_region.py: SAC region enumerated header codes(Flinn-Engdahl)
 
 bbfk.py: python version sac bbfk, translated sac-102.0/src/fks/xbbfk.c
