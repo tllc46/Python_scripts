@@ -69,6 +69,8 @@ def l_parameter_computation():
 
 def pml_boundary_elastic():
     #pml_compute.f90/pml_boundary_elastic()
+    global displ_elastic_old,displ_elastic,veloc_elastic,accel_elastic
+
     if not anyabs:
         return
 
