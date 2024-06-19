@@ -72,6 +72,7 @@ def pml_compute_memory_variables_elastic()
     global dux_dxl,dux_dzl,duz_dxl,duz_dzl
     global pml_dux_dxl,pml_dux_dzl,pml_duz_dxl,pml_duz_dzl
     global kappa_x,kappa_z,d_x,d_z,alpha_x,alpha_z,beta_x,beta_z
+    global rmemory_dux_dx,rmemory_duz_dx,rmemory_dux_dz,rmemory_duz_dz
 
     if nspec_pml:
         return
@@ -126,7 +127,8 @@ def pml_compute_memory_variables_elastic()
 
 def pml_compute_accel_contribution_elastic():
     #pml_compute_accel_contribution.f90/pml_compute_accel_contribution_elastic()
-    global accel_elsatic_pml
+    global accel_elastic_pml
+    global rmemory_displ_elastic
 
     ispec_pml=spce_to_pml(ispec)
     cpml_region_local=region_cpml(ispec)
@@ -147,8 +149,7 @@ def pml_compute_accel_contribution_elastic():
 def compute_forces_viscoelastic():
     #compute_forces_viscoelastic.F90/compute_forces_viscoelastic()
     global dux_dxl,dux_dzl,duz_dxl,duz_dzl
-    global accel_elastic,veloc_elastic,displ_elastic
-    global displ_elastic_old
+    global accel_elastic
     global dummy_loc
     global rhol
 
