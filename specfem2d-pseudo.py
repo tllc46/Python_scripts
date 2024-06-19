@@ -67,7 +67,7 @@ def l_parameter_computation():
 
     return a_0,a_1,a_2,a_3,a_4,coef0_1,coef1_1,coef2_1,coef0_1,coef1_2,coef2_2
 
-def pml_compute_memory_variables_elastic()
+def pml_compute_memory_variables_elastic():
     #pml_compute_memory_variables.f90/pml_compute_memory_variables_elastic()
     global dux_dxl,dux_dzl,duz_dxl,duz_dzl
     global pml_dux_dxl,pml_dux_dzl,pml_duz_dxl,pml_duz_dzl
