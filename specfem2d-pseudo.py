@@ -67,6 +67,22 @@ def l_parameter_computation():
 
     return a_0,a_1,a_2,a_3,a_4,coef0_1,coef1_1,coef2_1,coef0_1,coef1_2,coef2_2
 
+def pml_boundary_elastic():
+    #pml_compute.f90/pml_boundary_elastic()
+    if not anyabs:
+        return
+
+    if not pml_nglob_abs_elastic:
+        return
+
+    idx=np.arange(stop=pml_nglob_abs_elastic) #... or maybe idx=range(pml_nglob_abs_elastic)
+    iglob=pml_abs_points_elastic(idx)
+
+    displ_elastic_old[:,iglob]=np.zeros(shape=(ndim,pml_nglob_abs_elastic))
+    displ_elastic[:,iglob]=np.zeros(shape=(ndim,pml_nglob_abs_elastic))
+    veloc_elastic[:,iglob]=np.zeros(shape=(ndim,pml_nglob_abs_elastic))
+    accel_elastic[:,iglob]=np.zeros(shape=(ndim,pml_nglob_abs_elastic))
+
 def pml_compute_memory_variables_elastic():
     #pml_compute_memory_variables.f90/pml_compute_memory_variables_elastic()
     global dux_dxl,dux_dzl,duz_dxl,duz_dzl
