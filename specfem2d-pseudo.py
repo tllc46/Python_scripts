@@ -228,26 +228,28 @@ def compute_forces_viscoelastic():
         if pml_boundary_conditions and ispec_is_pml(ispec) and not iglob_is_forced(iglob):
             accel_elastic[:,iglob]-=accel_elastic_pml
 
+def compute_forces_viscoelastic_main():
+    #compute_forces_poroelastic_calling_routine.F90/compute_forces_viscoelastic_main()
+    global accel_elastic
+
+    for iphase in range(2):
+        compute_forces_viscoelastic()
+
+        if iphase==1:
+            if pml_boundary_conditions:
+                pml_boundary_elastic()
+
+    if pml_boundary_conditions and 0<nglob_interface and save_forward:
+        for i in range(nglob_interface):
+            print(accel_elastic[:,point_interface[i]],veloc_elastic[:,point_interface[i]],displ_elastic[:,point_interface[i]])
+
+    accel_elastic*=rmass_inverse_elastic
+
+    update_veloc_elastic_Newmark()
+
 #iterate_time.F90/iterate_time()
 for it in range(nstep):
     for i_stage in range(nstage_time_scheme):
         update_displ_Newmark()
-
-        #compute_forces_poroelastic_calling_routine.F90/compute_forces_viscoelastic_main()
-        for iphase in range(2):
-            compute_forces_viscoelastic()
-
-            if iphase==1:
-                if pml_boundary_conditions:
-                    pml_boundary_elastic(...)
-
-        if pml_boundary_conditions and 0<nglob_interface and save_forward:
-            for i in range(nglob_interface):
-                print(accel_elastic[:,point_interface[i]],veloc_elastic[:,point_interface[i]],displ_elastic[:,point_interface[i]])
-
-        accel_elastic*=rmass_inverse_elastic
-
-        update_veloc_elastic_Newmark()
-        #compute_forces_viscoelastic_main()
-
+        compute_forces_viscoelastic_main()
 #iterate_time()
