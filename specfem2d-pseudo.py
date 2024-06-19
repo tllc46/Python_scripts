@@ -228,6 +228,28 @@ def compute_forces_viscoelastic():
         if pml_boundary_conditions and ispec_is_pml(ispec) and not iglob_is_forced(iglob):
             accel_elastic[:,iglob]-=accel_elastic_pml
 
+def update_displ_Newmark():
+    #update_displacement_Newmark.F90/update_displ_Newmark()
+    update_displ_elastic_forward()
+
+def update_displ_elastic_forward():
+    #update_displacement_Newmark.F90/update_displ_elastic_forward()
+    update_displacement_newmark_elastic()
+
+def update_displacement_newmark_elastic():
+    #update_displacement_Newmark.F90/update_displacement_newmark_elastic()
+    global displ_elastic_old,displ_elastic,veloc_elastic,accel_elastic
+    if pml_boundary_conditions:
+        displ_elastic_old=displ_elastic+deltatsquareover2/2*accel_elastic
+    displ_elastic+=deltat*veloc_elastic+deltatsquareover2*accel_elastic
+    veloc_elastic+=deltatover2*accel_elastic
+    accel_elastic=np.zeros(shape=(ndim,nglob_elastic))
+
+def update_veloc_elastic_Newmark():
+    #update_displacement_Newmark.F90/update_veloc_elastic_Newmark()
+    global veloc_elastic
+    veloc_elastic+=deltatover2*accel_elastic
+
 def compute_forces_viscoelastic_main():
     #compute_forces_poroelastic_calling_routine.F90/compute_forces_viscoelastic_main()
     global accel_elastic
@@ -247,9 +269,9 @@ def compute_forces_viscoelastic_main():
 
     update_veloc_elastic_Newmark()
 
-#iterate_time.F90/iterate_time()
-for it in range(nstep):
-    for i_stage in range(nstage_time_scheme):
-        update_displ_Newmark()
-        compute_forces_viscoelastic_main()
-#iterate_time()
+def iterate_time():
+    #iterate_time.F90/iterate_time()
+    for it in range(nstep):
+        for i_stage in range(nstage_time_scheme):
+            update_displ_Newmark()
+            compute_forces_viscoelastic_main()
