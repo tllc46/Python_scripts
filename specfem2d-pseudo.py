@@ -1,7 +1,7 @@
 import numpy as np
 
 def compute_coef_convolution(bb):
-    #pml_compute.f90/compute_coef_convolution()
+    #specfem2D/pml_compute.f90
     temp=np.exp(-0.5*bb*dt)
     coef0=temp**2
     coef1=np.empty(shape=(ngllx,ngllz))
@@ -15,7 +15,7 @@ def compute_coef_convolution(bb):
     return coef0,coef1,coef2
 
 def lik_parameter_computation(kappa_x,beta_x,alpha_x,kappa_z,beta_z,alpha_z,index_ik):
-    #pml_compute.f90/lik_parameter_computation()
+    #specfem2D/pml_compute.f90
     if index_ik==13:
         cpml_x_only_temp=cpml_x_only
         cpml_z_only_temp=cpml_z_only
@@ -42,7 +42,7 @@ def lik_parameter_computation(kappa_x,beta_x,alpha_x,kappa_z,beta_z,alpha_z,inde
     return a_0,a_1,a_2,coef0_1,coef1_1,coef2_1,coef0_2,coef1_2,coef2_2
 
 def l_parameter_computation():
-    #pml_compute.f90/l_parameter_computation()
+    #specfem2D/pml_compute.f90
     if cpml_region_local==cpml_xz:
         a_0=kappa_x*kappa_z
         a_1=a_0*((beta_x-alpha_x)+(beta_z-alpha_z))
@@ -68,7 +68,7 @@ def l_parameter_computation():
     return a_0,a_1,a_2,a_3,a_4,coef0_1,coef1_1,coef2_1,coef0_1,coef1_2,coef2_2
 
 def pml_boundary_elastic():
-    #pml_compute.f90/pml_boundary_elastic()
+    #specfem2D/pml_compute.f90
     global displ_elastic_old,displ_elastic,veloc_elastic,accel_elastic
 
     if not anyabs:
@@ -86,7 +86,7 @@ def pml_boundary_elastic():
     accel_elastic[:,iglob]=np.zeros(shape=(ndim,pml_nglob_abs_elastic))
 
 def pml_compute_memory_variables_elastic():
-    #pml_compute_memory_variables.f90/pml_compute_memory_variables_elastic()
+    #specfem2D/pml_compute_memory_variables.f90
     global dux_dxl,dux_dzl,duz_dxl,duz_dzl
     global pml_dux_dxl,pml_dux_dzl,pml_duz_dxl,pml_duz_dzl
     global kappa_x,kappa_z,d_x,d_z,alpha_x,alpha_z,beta_x,beta_z
@@ -144,7 +144,7 @@ def pml_compute_memory_variables_elastic():
     duz_dzl=a8*pml_duz_dzl+a9*rmemory_duz_dz[:,:,isepc_pml,0]+a10*rmemory_duz_dz[:,:,ispec_pml,1]
 
 def pml_compute_accel_contribution_elastic():
-    #pml_compute_accel_contribution.f90/pml_compute_accel_contribution_elastic()
+    #specfem2D/pml_compute_accel_contribution.f90
     global accel_elastic_pml
     global rmemory_displ_elastic
 
@@ -165,7 +165,7 @@ def pml_compute_accel_contribution_elastic():
     accel_elastic_pml[1]=wxgll[:,None]*wzgll[None]*fac*(a1*veloc_elastic[1,iglob]+a2*dummy_loc[1]+a3*rmemory_displ_elastic[0,1,:,:,ispec_pml]+a4*rmemory_displ_elastic[1,1,:,:,ispec_pml])
 
 def compute_forces_viscoelastic():
-    #compute_forces_viscoelastic.F90/compute_forces_viscoelastic()
+    #specfem2D/compute_forces_viscoelastic.F90
     global dux_dxl,dux_dzl,duz_dxl,duz_dzl
     global accel_elastic
     global dummy_loc
@@ -229,15 +229,15 @@ def compute_forces_viscoelastic():
             accel_elastic[:,iglob]-=accel_elastic_pml
 
 def update_displ_Newmark():
-    #update_displacement_Newmark.F90/update_displ_Newmark()
+    #specfem2D/update_displacement_Newmark.F90
     update_displ_elastic_forward()
 
 def update_displ_elastic_forward():
-    #update_displacement_Newmark.F90/update_displ_elastic_forward()
+    #specfem2D/update_displacement_Newmark.F90
     update_displacement_newmark_elastic()
 
 def update_displacement_newmark_elastic():
-    #update_displacement_Newmark.F90/update_displacement_newmark_elastic()
+    #specfem2D/update_displacement_Newmark.F90
     global displ_elastic_old,displ_elastic,veloc_elastic,accel_elastic
     if pml_boundary_conditions:
         displ_elastic_old=displ_elastic+deltatsquareover2/2*accel_elastic
@@ -246,12 +246,12 @@ def update_displacement_newmark_elastic():
     accel_elastic=np.zeros(shape=(ndim,nglob_elastic))
 
 def update_veloc_elastic_Newmark():
-    #update_displacement_Newmark.F90/update_veloc_elastic_Newmark()
+    #specfem2D/update_displacement_Newmark.F90
     global veloc_elastic
     veloc_elastic+=deltatover2*accel_elastic
 
 def compute_forces_viscoelastic_main():
-    #compute_forces_poroelastic_calling_routine.F90/compute_forces_viscoelastic_main()
+    #specfem2D/compute_forces_poroelastic_calling_routine.F90
     global accel_elastic
 
     for iphase in range(2):
@@ -270,7 +270,7 @@ def compute_forces_viscoelastic_main():
     update_veloc_elastic_Newmark()
 
 def iterate_time():
-    #iterate_time.F90/iterate_time()
+    #specfem2D/iterate_time.F90
     for it in range(nstep):
         for i_stage in range(nstage_time_scheme):
             update_displ_Newmark()
