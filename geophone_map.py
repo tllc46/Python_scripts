@@ -1,7 +1,6 @@
 def parse_kml():
     from pykml import parser
 
-
     namespace={"kml":"http://www.opengis.net/kml/2.2"}
 
     kml_file_name="Weonju.kml"
