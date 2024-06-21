@@ -82,7 +82,7 @@ def naver_map():
         #리스트 선택
         elems=driver.find_elements(by=By.CLASS_NAME,value="swt-save-group-item")
         for elem in elems:
-            sub_elem=elem.find_element(by=By.CLASS_NAME,value="swt-save-group-name") #"폴더명\n내 장소"
+            sub_elem=elem.find_element(by=By.CLASS_NAME,value="swt-save-group-name") #"폴더명\n리스트명"
             if sub_elem.text.split(sep="\n")[-1]==list_name:
                 break
         elem=elem.find_element(by=By.CLASS_NAME,value="swt-save-group-info")
