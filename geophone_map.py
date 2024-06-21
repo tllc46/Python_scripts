@@ -10,7 +10,7 @@ def parse_kml():
         if folder.name=="원주_지오폰_어레이_위치":
             break
 
-    namespace=ns={"kml":"http://www.opengis.net/kml/2.2"}
+    namespace={"kml":"http://www.opengis.net/kml/2.2"}
     csv_file_name="Weonju.txt"
     csv_file=open(file=csv_file_name,mode="w")
 
