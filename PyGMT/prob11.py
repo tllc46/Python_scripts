@@ -27,10 +27,10 @@ fig.plot(x=region[:2],y=[0,0],frame=["lEt","y1","y+lheight(km)"],fill="lightblue
 fig.plot(x=track[2],y=track[3],fill="black",close="+yb")
 
 #depth plot
-profile=pygmt.project(data=df[["longitude","latitude","depth","magnitude"]],center=[129.05,35.55],endpoint=[129.9,37],width=[-0.2,0.2])
-profile_big=profile.loc[profile[3].isin([5.1,5.8,5.4])]
-region[2:]=pygmt.info(data=profile[2],nearest_multiple=5)[:2]
+profile=pygmt.project(data=df[["longitude","latitude","depth","magnitude"]],center=[129.05,35.55],endpoint=[129.9,37],convention="pz",length="w",width=[-0.2,0.2])
+profile_big=profile.loc[profile[2].isin([5.1,5.8,5.4])]
+region[2:]=pygmt.info(data=profile[1],nearest_multiple=5)[:2]
 fig.shift_origin(yshift=f"-{y_shift}c")
-fig.plot(x=profile[4],y=profile[2],size=0.05*profile[3],frame=["WrS","x0.5","x+ldistance(@.)","ya10f5","y+ldepth(km)"],projection=f"xy/6c/-{depth_scale}c",region=region,style="cc",pen="red")
-fig.plot(x=profile_big[4],y=profile_big[2],size=0.05*profile_big[3],style="cc",pen="black")
+fig.plot(x=profile[0],y=profile[1],size=0.05*profile[2],frame=["WrS","x0.5","x+ldistance(@.)","ya10f5","y+ldepth(km)"],projection=f"xy/6c/-{depth_scale}c",region=region,style="cc",pen="red")
+fig.plot(x=profile_big[0],y=profile_big[1],size=0.05*profile_big[2],style="cc",pen="black")
 fig.savefig(fname="prob11.png")
