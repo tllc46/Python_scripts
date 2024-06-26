@@ -22,12 +22,13 @@ delta=st[0].stats.delta
 
 dtmo=np.array(object=[-st[i].stats.sac.user0 for i in range(len(st))]) #ak135 moveout
 imo=int(np.rint(dtmo/delta))
-dtcs=np.zeros(shape=len(st)) #stack으로 결정된 time shift
-nstkwb=int(stkwb/delta) #stack 구간 시작까지 npts
+dtcs=np.zeros(shape=len(st)) #1회 stack으로 결정된 time shift
+#ak135에 대해 나중에 도착하면 음수, 먼저 도착하면 양수
+nstkwb=int(stkwb/delta) #data 시작부터 stack 구간 시작까지 npts
 nstkwl=int(stkwl/delta) #stack 구간 npts
 jim1=int(np.rint(dtcmin/delta))
 jim2=int(np.rint(dtcmax/delta))
-errs=np.empty(shape=len(st)) #stack으로 결정된 오차
+errs=np.empty(shape=len(st)) #오차
 
 #정규화
 for i in range(len(st)):
@@ -54,34 +55,34 @@ for i in range(nsi):
         for k in range(jim2-jim1+1):
             wsp[k]=sum(abs(zssl-st[j].data[nstkwb+imo[j]+(k+jim1)-1:nstkwb+nstkwl+imo[j]+(k+jim1)])**pjgl)/stkwl #Lp norm
 
-        jm=np.argmin(a=wsp) #탐색 구간에서 Lp norm이 최소가 되는 색인
+        jm=np.argmin(a=wsp) #Lp norm이 최소가 되는 색인
 
-        #오차 계산
+        #오차
         if i==nsi-1: #마지막 반복 단계에서만 계산
             wm=wsp[jm] #최소 Lp norm
-            swl,swr=0,0 #음/양의 오차 발견 완료 여부
+            swl,swr=0,0 #음/양의 오차 존재 여부
 
-            if 0<jm: #최소 Lp norm이 탐색 구간 시작 이후 존재(jm!=0)
+            if 0<jm: #최소 Lp norm이 탐색 구간 시작 이후 존재
                 for l in range(jm-1,-1,-1): #음의 오차 탐색
                     if wm*erl<wsp[l]: #오차 교차점 발견
-                        swl=1 #음의 오차 발견 완료
+                        swl=1 #음의 오차 존재
                         errl=((jm-l)-(wsp[l]-wm*erl)/(wsp[l]-wsp[l+1]))*delta #선형 보간
                         break
 
-            if jm<jim2-jim1: #최소 Lp norm이 탐색 구간 끝 이전 존재(jm!=jim2-jim1)
+            if jm<jim2-jim1: #최소 Lp norm이 탐색 구간 끝 이전 존재
                 for l in range(jm+1,jim2-jim1): #양의 오차 탐색
                     if wm*erl<wsp[l]: #오차 교차점 발견
-                        swr=1 #양의 오차 발견 완료
+                        swr=1 #양의 오차 존재
                         errr=((l-jm)-(wsp[l]-wm*erl)/(wsp[l]-wsp[l-1]))*delta #선형 보간
                         break
 
-            if swl==1 and swr==1: #음/양의 오차 모두 발견
+            if swl==1 and swr==1: #음/양의 오차 모두 존재
                 err=0.5*(errr+errl) #평균
-            elif swl==1: #음의 오차만 발견
+            elif swl==1: #음의 오차만 존재
                 err=errl
-            elif swr==1: #양의 오차만 발견
+            elif swr==1: #양의 오차만 존재
                 err=errr
-            else: #아무 오차도 못 발견
+            else: #아무 오차도 없다
                 err=emax
 
             if err<emin: #최소 오차보다 작은 경우
