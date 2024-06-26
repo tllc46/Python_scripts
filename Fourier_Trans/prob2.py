@@ -7,8 +7,8 @@ T=256
 dt=1
 N=int(T/dt)
 
-omega_analy=np.arange(start=-3*np.pi,stop=3*np.pi,step=0.01)
-omega_dft=3*np.pi*np.linspace(start=-1,stop=1,num=3*N+1)
+omega_analy=np.arange(stop=int(6*np.pi/0.01))*0.01-3*np.pi
+omega_dft=np.arange(stop=3*N+1)*2*np.pi/N-3*np.pi
 
 analy=2*A*np.sin(0.5*tau*omega_analy)/omega_analy
 
@@ -16,9 +16,9 @@ seq=np.arange(stop=N)
 seq_rect=np.concatenate((seq[:int(0.5*tau)+1],seq[-int(0.5*tau):]))
 complex_dft=A*sum(np.exp(-1j*2*np.pi*seq*seq_rect[:,np.newaxis]/N))
 dft=complex_dft.real
-dft=np.concatenate((dft[int(0.5*N):],dft[:int(0.5*N)])) #rearange to make omega's range -pi~pi
-dft=np.tile(A=dft,reps=3) #repeat 3 times to make omega's range -3*pi~3*pi
-dft=np.append(arr=dft,values=dft[0]) #append first element to complete end of omega's range
+dft=np.concatenate((dft[int(0.5*N):],dft[:int(0.5*N)])) #omega 범위가 -pi ~ pi가 되도록 재배열
+dft=np.tile(A=dft,reps=3) #omega 범위가 -3*pi ~ 3*pi가 되도록 3회 반복
+dft=np.append(arr=dft,values=dft[0]) #omega=-3*pi의 요소를 뒤에 추가
 
 fig=plt.figure()
 ax=fig.subplots()
