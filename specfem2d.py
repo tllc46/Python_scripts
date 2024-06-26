@@ -102,7 +102,7 @@ def define_derivation_matrices(zgll,ngll):
         hprime.append(0)
 
     hprime=np.array(object=hprime)
-    hprime=np.append(arr=hprime,values=-hprime[int(ngll**2/2)-1::-1]).reshape(ngll,ngll) #important: hprime(i,j)=l_j'(xi_i), dim=i x j
+    hprime=np.append(arr=hprime,values=-hprime[int(ngll**2/2)-1::-1]).reshape(ngll,ngll) #중요: hprime(i,j)=l_j'(xi_i), 차원은 (i,j)
     return hprime
 
 xigll,wxgll=zwgljd(n=ngllx,alpha=0,beta=0)
