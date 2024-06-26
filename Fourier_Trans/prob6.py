@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-a_n=np.array([2,1.5,1])
-omega_n=np.array([np.pi/6,np.pi/3,0.5*np.pi])
-phi_n=np.array([0,np.pi/6,np.pi/3])
-t_n=np.array([90,130,170])
+a_n=np.array(object=[2,1.5,1])
+omega_n=np.array(object=[np.pi/6,np.pi/3,0.5*np.pi])
+phi_n=np.array(object=[0,np.pi/6,np.pi/3])
+t_n=np.array(object=[90,130,170])
 T=256
 dt=0.25
 dt_noise=0.5
@@ -19,7 +19,7 @@ noise=np.zeros(shape=N)
 noise[::2]=np.random.uniform(low=-0.2,high=0.2,size=N_noise)
 x_noise=x+noise
 
-omega=4*np.pi*np.linspace(start=-1,stop=1,num=N+1)
+omega=np.arange(stop=N+1)*8*np.pi/N-4*np.pi
 
 #6-2
 complex_dft=sum(x_noise[:,np.newaxis]*np.exp(-1j*2*np.pi*seq*seq[:,np.newaxis]/N))
@@ -28,7 +28,7 @@ abs_dft=np.concatenate((abs_dft[int(0.5*N):],abs_dft[:int(0.5*N)+1])) #rearrange
 
 #6-3
 lp=np.zeros(shape=N)
-ind_lp=int(np.floor((0.5*np.pi+3*np.sqrt(2)/35)/(2*np.pi/256))) #criterion: 3*standard deviation
+ind_lp=int(np.floor((0.5*np.pi+3*np.sqrt(2)/35)/(2*np.pi/256))) #저역 통과 기준 진동수: 0.5*pi+3*(표준 편차)
 lp[:ind_lp+1]=1
 lp[-ind_lp:]=1
 lp_dft=complex_dft*lp
