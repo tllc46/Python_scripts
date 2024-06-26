@@ -82,13 +82,13 @@ def zwgljd(n,alpha,beta): #GLJ 근과 가중치
     return z,w
 
 def define_derivation_matrices(zgll,ngll):
-    #zgll: zeros (gll points)
-    #ngll: no. of gll points
+    #zgll: GLL 점
+    #ngll: GLL 점 개수
     hprime=[] #h'
     index=0
     while index<int(ngll**2/2): #hprime은 부호만 반대일 뿐 점대칭 행렬이므로 반만 계산
-        i=int(index/ngll) #row no.
-        j=index%ngll #column no.
+        i=int(index/ngll) #행 좌표
+        j=index%ngll #열 좌표
         #lagrange_deriv_GLL
         if i==j==0:
             hprime.append(-0.25*ngll*(ngll-1))
