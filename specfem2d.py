@@ -175,7 +175,7 @@ decimals=smallvaltol-int(np.log10(xtypdist))
 xp=np.round(a=xp,decimals=decimals)
 zp=np.round(a=zp,decimals=decimals)
 
-#모든 GLL 점들(중복 포함)의 x 좌표로 먼저 정렬, 그 다음 같은 x 좌표들 내에서는 z 좌표로 정렬
+#모든 GLL 점들(중복 포함)을 x 좌표로 먼저 정렬, 그 다음 같은 x 좌표들 내에서는 z 좌표로 정렬
 locval=np.lexsort(keys=(zp,xp))
 xp=xp[locval]
 zp=zp[locval]
