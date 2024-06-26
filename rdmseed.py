@@ -1,5 +1,7 @@
 from datetime import datetime,timedelta
 from struct import unpack
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -28,46 +30,46 @@ def data_split(binary,size):
     differences.reverse()
     return differences
 
-def decode_data(file):
+def decode_data():
     difference=[]
     global data
     break_i=False
     for i in range(frame_count):
-        nibble=nibble_split(int.from_bytes(file.read(4)))
-        for j in range(1,16): #j=0 is for nibbles
+        nibble=nibble_split(binary=int.from_bytes(bytes=file.read(4)))
+        for j in range(1,16): #j=0 첫 번째 byte는 nibble들
             if nibble[j]==0:
-                if i==0 and j==1: #first data
-                    x0=int.from_bytes(file.read(4),signed=True)
-                elif i==0 and j==2: #last data
-                    xn=int.from_bytes(file.read(4),signed=True)
-                else: #end of data
-                    file.seek((16-j)*4+(frame_count-1-i)*64,1) #move to end of record
+                if i==0 and j==1: #시작 data(x0)
+                    x0=int.from_bytes(bytes=file.read(4),signed=True)
+                elif i==0 and j==2: #마지막 data(xn)
+                    xn=int.from_bytes(bytes=file.read(4),signed=True)
+                else: #data의 끝
+                    file.seek((16-j)*4+(frame_count-1-i)*64,os.SEEK_CUR) #record 끝으로 이동
                     break_i=True
                     break
             elif nibble[j]==1:
-                difference+=list(unpack(">4b",file.read(4)))
+                difference+=list(unpack(format=">4b",buffer=file.read(4)))
             elif nibble[j]==2:
-                binary=int.from_bytes(file.read(4))
+                binary=int.from_bytes(bytes=file.read(4))
                 decode_nibble=binary>>30
                 if decode_nibble==1:
-                    difference+=data_split(binary,30)
+                    difference+=data_split(binary=binary,size=30)
                 elif decode_nibble==2:
-                    difference+=data_split(binary,15)
+                    difference+=data_split(binary=binary,size=15)
                 else: #decode_nibble==3:
-                    difference+=data_split(binary,10)
+                    difference+=data_split(binary=binary,size=10)
             else: #nibble[j]==3:
-                binary=int.from_bytes(file.read(4))
+                binary=int.from_bytes(bytes=file.read(4))
                 decode_nibble=binary>>30
                 if decode_nibble==0:
-                    difference+=data_split(binary,6)
+                    difference+=data_split(binary=binary,size=6)
                 elif decode_nibble==1:
-                    difference+=data_split(binary,5)
+                    difference+=data_split(binary=binary,size=5)
                 else: #decode_nibble==2:
-                    difference+=data_split(binary,4)
+                    difference+=data_split(binary=binary,size=4)
         if break_i:
             break
-    difference=np.array(difference[1:])
-    data=np.concatenate(([x0],x0+np.cumsum(difference)))
+    difference=np.array(object=difference[1:])
+    data=np.concatenate(([x0],x0+np.cumsum(a=difference)))
     return None
 
 activity_flags=["calibration signals present",
@@ -106,51 +108,51 @@ blockette_type={0:"none",
 word_order=["little endian",
         "big endian"]
 
-with open("AU.WB9..BHZ",mode="rb") as file:
+with open(file="AU.WB9..BHZ",mode="rb") as file:
     traces=[]
     times=[]
-    #first record
-    #read and parse full header
-    header_word=file.read(20).decode("ascii")
-    header_num=unpack(">HHBBBBH HHHBBBBlHH",file.read(28))
-    zero_date=datetime.strptime(f"{header_num[0]} {header_num[1]} {header_num[2]} {header_num[3]} {header_num[4]} {header_num[6]*100:06}","%Y %j %H %M %S %f") #starting date
-    npts=header_num[7] #number of samples
+    #첫 번째 record
+    #header 전체 parse
+    header_word=file.read(20).decode(encoding="ascii")
+    header_num=unpack(format=">HHBBBBH HHHBBBBlHH",buffer=file.read(28))
+    zero_date=datetime.strptime(date_string=f"{header_num[0]} {header_num[1]} {header_num[2]} {header_num[3]} {header_num[4]} {header_num[6]*100:06}",format="%Y %j %H %M %S %f") #시작 날짜, 시간
+    npts=header_num[7] #npts
     delta=1/header_num[8] #delta
 
-    b1000=unpack(">HHBBBB",file.read(8)) #blockette 1000
-    frame_count=(1<<(b1000[4]-6))-1 #frame count
+    b1000=unpack(format=">HHBBBB",buffer=file.read(8)) #1000번 blockette
+    frame_count=(1<<(b1000[4]-6))-1 #frame 개수
 
-    file.seek(8,1) #dummy bytes
+    file.seek(8,os.SEEK_CUR) #dummy bytes
 
-    #decode data
-    decode_data(file)
-    time=np.arange(npts)*delta
+    #data 복호
+    decode_data()
+    time=np.arange(stop=npts)*delta
     traces.append(data)
     times.append(time)
     end_date=zero_date+timedelta(seconds=(npts-1)*delta)
 
     while file.read(1):
-        #read header
-        file.seek(19,1)
-        sub_header=unpack(">HHBBBBH H",file.read(12)) #parse only starting date and number of samples
-        start_date=datetime.strptime(f"{sub_header[0]} {sub_header[1]} {sub_header[2]} {sub_header[3]} {sub_header[4]} {sub_header[6]*100:06}","%Y %j %H %M %S %f") #starting date
+        #일부 header 읽기
+        file.seek(19,os.SEEK_CUR)
+        sub_header=unpack(format=">HHBBBBH H",buffer=file.read(12)) #header 중에서 시작 날짜, 시간, npts만 parse
+        start_date=datetime.strptime(date_string=f"{sub_header[0]} {sub_header[1]} {sub_header[2]} {sub_header[3]} {sub_header[4]} {sub_header[6]*100:06}",format="%Y %j %H %M %S %f") #시작 날짜, 시간
         npts=sub_header[7] #number of samples
-        file.seek(32,1)
+        file.seek(32,os.SEEK_CUR)
 
         #decode data
-        decode_data(file)
+        decode_data()
         offset=(start_date-zero_date).total_seconds()
-        time=offset+np.arange(npts)*delta
+        time=offset+np.arange(stop=npts)*delta
         print(len(time),npts,delta)
-        if delta<(start_date-end_date).total_seconds(): #gap
+        if delta<(start_date-end_date).total_seconds(): #이전 record 사이 공백
             traces.append(data)
             times.append(time)
-        else: #no gap
+        else: #이전 record와 연속
             traces[-1]=np.concatenate((traces[-1],data))
             times[-1]=np.concatenate((times[-1],time))
         end_date=start_date+timedelta(seconds=(npts-1)*delta)
 
-#print header information
+#header 정보 출력
 print(f"sequence number={header_word[:6]}")
 print(f"data header/quality indicator={header_word[6]}")
 print(f"reserved byte={header_word[7]}")
@@ -183,9 +185,9 @@ print("word order=",word_order[b1000[3]])
 print(f"data record length={b1000[4]}")
 print(f"reserved byte={b1000[5]}")
 
-#plot waveform
+#파형 그림
 fig=plt.figure()
 ax=fig.subplots()
 for i in range(len(traces)):
     ax.plot(times[i],traces[i],color="black")
-fig.savefig("trace.png")
+fig.savefig(fname="trace.png")
