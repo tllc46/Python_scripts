@@ -7,18 +7,18 @@ from obspy.taup import TauPyModel
 import numpy as np
 import matplotlib.pyplot as plt
 
-minslow=10    #minimum slowness
-maxslow=20   #maximum slowness
-nslow=100     #no. of slowness intervals
-tbegin=20   #begin time of timewindow
-tend=50     #end time of timewindow
+minslow=10 #최소 slowness
+maxslow=20 #최대 slowness
+nslow=100 #slowness 간격 개수
+tbegin=20 #stack 구간 시작 시각
+tend=50 #stack 구간 끝 시각
 
 def vesp(slow):
-    #convert slowness unit s/° to s/km
-    sx=-slow*np.sin(baz*np.pi/180)*180/(np.pi*6371)
-    sy=-slow*np.cos(baz*np.pi/180)*180/(np.pi*6371)
+    #slowness 단위를 s/degree->s/km 변환
+    sx=-slow*np.sin(np.radians(baz))*180/(np.pi*6371)
+    sy=-slow*np.cos(np.radians(baz))*180/(np.pi*6371)
 
-    #calculate time shifts
+    #time shift 계산
     timeshift=get_timeshift(geometry=geometry,sll_x=sx,sll_y=sy,sl_s=0,grdpts_x=1,grdpts_y=1).squeeze()
     timeshift=delta*np.rint(timeshift/delta)
 
@@ -28,7 +28,7 @@ def vesp(slow):
     for i in range(len(st_stack)):
         st_stack[i].stats.starttime-=timeshift[i]
     
-    #common time window
+    #stack할 구간으로 자르기
     st_stack.trim(starttime=st[0].stats.starttime+tbegin,endtime=st[0].stats.starttime+tend,pad=True,fill_value=0)
 
     #stacking
@@ -36,16 +36,16 @@ def vesp(slow):
 
     return st_stack[0].data
 
-npvesp=np.frompyfunc(vesp,1,1)
+npvesp=np.frompyfunc(vesp,nin=1,nout=1)
 
 #main
-#all trace must align by event time(iztype=io)
+#모든 trace는 event 발생 시각으로 정렬되어 있어야 한다(iztype=io)
 st=read(pathname_or_url="filtdata/24/Z/*",format="SAC",byteorder="little")
 
 for i in range(len(st)):
     st[i].stats.coordinates=AttribDict({"latitude":st[i].stats.sac.stla,"longitude":st[i].stats.sac.stlo,"elevation":-12345})
 
-#array geometry
+#지진계 중심으로부터 거리 vector
 geometry=get_geometry(stream=st,return_center=True)
 center=geometry[-1]
 geometry=geometry[:-1]
@@ -54,25 +54,27 @@ geometry=geometry[:-1]
 _,_,baz=gps2dist_azimuth(st[0].stats.sac.evla,st[0].stats.sac.evlo,center[1],center[0])
 
 delta=st[0].stats.delta
-time=np.arange(tbegin,tend+delta,delta)
-slow=np.linspace(minslow,maxslow,nslow+1)
+n_time=np.rint((tend-tbegin)/delta)
+time=np.arange(stop=n_time+1)*delta+tbegin
+slow=np.arange(stop=nslow+1)*(maxslow-minslow)/nslow+minslow
 
 #beamforming
 beam=npvesp(slow)
-beam=np.stack(beam)
+beam=np.stack(arrays=beam)
 beam/=beam.max()
 time,slow=np.meshgrid(time,slow)
 
 #theorital travel time, ray parameter
 model=TauPyModel(model="ak135")
-arrivals=model.get_travel_times_geo(st[0].stats.sac.evdp,st[0].stats.sac.evla,st[0].stats.sac.evlo,center[1],center[0],["P","Pn"])
+arrivals=model.get_travel_times_geo(source_depth_in_km=st[0].stats.sac.evdp,source_latitude_in_deg=st[0].stats.sac.evla,source_longitude_in_deg=st[0].stats.sac.evlo,receiver_latitude_in_deg=center[1],receiver_longitude_in_deg=center[0],phase_list=["P","Pn"])
 
-plt.set_cmap("seismic")
-plt.pcolormesh(time,slow,beam,vmin=-1,vmax=1)
-plt.scatter(arrivals[1].time,arrivals[1].ray_param_sec_degree,c="black",s=240,marker="+")
-plt.annotate(arrivals[1].name,(arrivals[1].time,arrivals[1].ray_param_sec_degree),color="black",xytext=(5,5),textcoords="offset points")
-plt.scatter(arrivals[2].time,arrivals[2].ray_param_sec_degree,c="black",s=240,marker="+")
-plt.annotate(arrivals[2].name,(arrivals[2].time,arrivals[2].ray_param_sec_degree),color="black",xytext=(5,5),textcoords="offset points")
-plt.xlabel("time(s)")
-plt.ylabel("slowness(s/°)")
+fig=plt.figure()
+ax=fig.subplots()
+ax.pcolormesh(time,slow,beam,cmap="seismic",vmin=-1,vmax=1)
+ax.scatter(x=arrivals[1].time,y=arrivals[1].ray_param_sec_degree,s=240,c="black",marker="+")
+ax.annotate(text=arrivals[1].name,xy=(arrivals[1].time,arrivals[1].ray_param_sec_degree),xytext=(5,5),textcoords="offset points",color="black")
+ax.scatter(x=arrivals[2].time,y=arrivals[2].ray_param_sec_degree,s=240,c="black",marker="+")
+ax.annotate(text=arrivals[2].name,xy=(arrivals[2].time,arrivals[2].ray_param_sec_degree),xytext=(5,5),textcoords="offset points",color="black")
+ax.set_xlabel(xlabel="time(s)")
+ax.set_ylabel(ylabel="slowness(s/°)")
 plt.show()
