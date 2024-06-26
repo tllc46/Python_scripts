@@ -24,7 +24,7 @@ nxyz=ngllx*ngllz #한 요소의 총 GLL 점 개수
 ntot=nxyz*nspec #총 GLL 점 개수(중복 포함)
 nglob=(nelem_x*(ngllx-1)+1)*(nelem_z*(ngllz-1)+1) #총 고유 GLL 점 개수(중복 미포함)
 
-ngnod=4 #4개의 node가 한 요소의 모양을 결정
+ngnod=4 #4개의 node가 한 요소의 형상을 결정
 
 deltat=0.0011 #[s]
 nstep=1600 #시간 단계 개수
