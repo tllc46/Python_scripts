@@ -21,7 +21,7 @@ st=read(pathname_or_url="*.sac.ft.cut",format="SAC",byteorder="little")
 delta=st[0].stats.delta
 
 dtmo=np.array(object=[-st[i].stats.sac.user0 for i in range(len(st))]) #ak135 moveout
-imo=int(np.rint(dtmo/delta))
+imo=np.rint(dtmo/delta).astype(dtype=int)
 dtcs=np.zeros(shape=len(st)) #1회 stack으로 결정된 time shift
 #ak135에 대해 나중에 도착하면 음수, 먼저 도착하면 양수
 nstkwb=int(stkwb/delta) #data 시작부터 stack 구간 시작까지 npts
