@@ -77,8 +77,8 @@ def endw2(n,alpha,beta): #xi=1 GLL 점의 가중치
 def zwgljd(n,alpha,beta): #GLJ 근과 가중치
     z,w=roots_jacobi(n=n-2,alpha=alpha+1,beta=beta+1) #Jacobi 다항식의 근과 가중치
     w/=1-z**2
-    z=np.insert(arr=z,obj=[0,n-2],values=[-1,1]) #add -1 and 1
-    w=np.insert(arr=w,obj=[0,n-2],values=[endw1(n=n-1,alpha=alpha,beta=beta),endw2(n=n-1,alpha=alpha,beta=beta)]) #add -1 and 1's weights
+    z=np.insert(arr=z,obj=[0,n-2],values=[-1,1]) #GLL 점에 -1, 1도 추가
+    w=np.insert(arr=w,obj=[0,n-2],values=[endw1(n=n-1,alpha=alpha,beta=beta),endw2(n=n-1,alpha=alpha,beta=beta)]) #가중치에 -1,1의 가중치도 추가
     return z,w
 
 def define_derivation_matrices(zgll,ngll):
