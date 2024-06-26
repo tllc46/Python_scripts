@@ -45,12 +45,12 @@ jgll_receiver=0
 
 f0=10
 t0=1.2/f0
-factor_amplitude=1E+10
+factor_amplitude=1E10
 a=(np.pi*f0)**2
 
 ndim=2
 smallvaltol=10
-stability_threshold=1E+25
+stability_threshold=1E25
 
 knods=np.empty(shape=(ngnod,nspec),dtype=int)
 coorg=np.empty(shape=(ndim,npgeo))
