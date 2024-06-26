@@ -1,99 +1,101 @@
+#astack/tcas.f 참고
+
 from obspy import read
 
 import numpy as np
 
-nsi=10 #no. of stacking iterations
-pjgl=1.2 #stack index (the Lp norm used)
-erl=1.0095 #error factor
-emin=0.01 #minimum error
-emax=0.15 #maximum error
-stkwb=34 #start of stack window
-stkwl=13 #length of stack window
-dtcmin=-0.5 #min bound on differential time search
-dtcmax=0.5 #max bound on differential time search
+nsi=10 #stack 반복 횟수
+pjgl=1.2 #Lp norm 지수
+erl=1.0095 #오차 factor
+emin=0.01 #최소 오차
+emax=0.15 #최대 오차
+stkwb=34 #stack 구간 시작 시각
+stkwl=13 #stack 구간 길이
+dtcmin=-0.5 #최소 time shift
+dtcmax=0.5 #최대 time shift
 
-#user0 header=moveout correction by ak135
-#npts don't have to be same, but begin time must all be same
-st=read("*.sac.ft.cut")
+#user0 header는 ak135 모형에 근거한 초기 moveout 저장
+#npts는 같을 필요는 없지만, 시작 시각은 모두 같아야 한다
+st=read(pathname_or_url="*.sac.ft.cut",format="SAC",byteorder="little")
 delta=st[0].stats.delta
 
-dtmo=np.array([-st[i].stats.sac.user0 for i in range(len(st))]) #moveout correction
-imo=np.rint(dtmo/delta).astype(int)
-dtcs=np.zeros(len(st)) #local time shift from stacking iteration
-nstkwb=int(stkwb/delta) #no. of samples to start of stack window
-nstkwl=int(stkwl/delta) #no. of samples in stack window
+dtmo=np.array(object=[-st[i].stats.sac.user0 for i in range(len(st))]) #ak135 moveout
+imo=int(np.rint(dtmo/delta))
+dtcs=np.zeros(shape=len(st)) #stack으로 결정된 time shift
+nstkwb=int(stkwb/delta) #stack 구간 시작까지 npts
+nstkwl=int(stkwl/delta) #stack 구간 npts
 jim1=int(np.rint(dtcmin/delta))
 jim2=int(np.rint(dtcmax/delta))
-errs=np.empty(len(st)) #pick error estimated from trace power
+errs=np.empty(shape=len(st)) #stack으로 결정된 오차
 
-#normalization
+#정규화
 for i in range(len(st)):
     st[i].data/=max(abs(st[i].data))
 
-#initial stacking
-zssl=np.zeros(nstkwl+1) #linear trace stack
-zscp=np.zeros(nstkwl+1) #quadratic trace stack
-lmn=np.rint((-dtmo+dtcs)/delta).astype(int)
+#초기 stack
+zssl=np.zeros(shape=nstkwl+1) #선형 stack
+zscp=np.zeros(shape=nstkwl+1) #이차 stack
+lmn=np.rint((-dtmo+dtcs)/delta).astype(dtype=int)
 
 for i in range(len(st)):
     zssl+=st[i].data[nstkwb-lmn[i]-1:nstkwb+nstkwl-lmn[i]]
     zscp+=st[i].data[nstkwb-lmn[i]-1:nstkwb+nstkwl-lmn[i]]**2
 
-pstakn=sum(zscp)/(len(st)*stkwl) #L2 measure of trace misfit
+pstakn=sum(zscp)/(len(st)*stkwl)
 print(f"initial pstakn={pstakn}")
 zssl/=max(abs(zssl))
 
 #adaptive stacking
 for i in range(nsi):
     for j in range(len(st)):
-        wsp=np.empty(jim2-jim1+1) #power of weighted stack
+        wsp=np.empty(shape=jim2-jim1+1) #time shift 탐색 구간에서 Lp norm
 
         for k in range(jim2-jim1+1):
-            wsp[k]=sum(abs(zssl-st[j].data[nstkwb+imo[j]+(k+jim1)-1:nstkwb+nstkwl+imo[j]+(k+jim1)])**pjgl)/stkwl #Lp norm misfit
+            wsp[k]=sum(abs(zssl-st[j].data[nstkwb+imo[j]+(k+jim1)-1:nstkwb+nstkwl+imo[j]+(k+jim1)])**pjgl)/stkwl #Lp norm
 
-        jm=np.argmin(wsp) #minimun value's index
+        jm=np.argmin(a=wsp) #탐색 구간에서 Lp norm이 최소가 되는 색인
 
-        #error estimation
-        if i==nsi-1: #only last iteration
-            wm=np.min(wsp) #minimum value
-            swl,swr=0,0 #switches for half width error determination
+        #오차 계산
+        if i==nsi-1: #마지막 반복 단계에서만 계산
+            wm=wsp[jm] #최소 Lp norm
+            swl,swr=0,0 #음/양의 오차 발견 완료 여부
 
-            if 0<jm: #minimum index is not left boundry
-                for l in range(jm-1,-1,-1):
-                    if wm*erl<wsp[l]: #found intersection in left range
-                        swl=1
-                        errl=((jm-l)-(wsp[l]-wm*erl)/(wsp[l]-wsp[l+1]))*delta #linear interpolation
+            if 0<jm: #최소 Lp norm이 탐색 구간 시작 이후 존재(jm!=0)
+                for l in range(jm-1,-1,-1): #음의 오차 탐색
+                    if wm*erl<wsp[l]: #오차 교차점 발견
+                        swl=1 #음의 오차 발견 완료
+                        errl=((jm-l)-(wsp[l]-wm*erl)/(wsp[l]-wsp[l+1]))*delta #선형 보간
                         break
 
-            if jm<jim2-jim1: #minimum index is not right boundary
-                for l in range(jm+1,jim2-jim1):
-                    if wm*erl<wsp[l]: #found intersection in right range
-                        swr=1
-                        errr=((l-jm)-(wsp[l]-wm*erl)/(wsp[l]-wsp[l-1]))*delta #linear interpolation
+            if jm<jim2-jim1: #최소 Lp norm이 탐색 구간 끝 이전 존재(jm!=jim2-jim1)
+                for l in range(jm+1,jim2-jim1): #양의 오차 탐색
+                    if wm*erl<wsp[l]: #오차 교차점 발견
+                        swr=1 #양의 오차 발견 완료
+                        errr=((l-jm)-(wsp[l]-wm*erl)/(wsp[l]-wsp[l-1]))*delta #선형 보간
                         break
 
-            if swl==1 and swr==1: #left, right error exist
-                err=0.5*(errr+errl) #average
-            elif swl==1: #only left error exists
+            if swl==1 and swr==1: #음/양의 오차 모두 발견
+                err=0.5*(errr+errl) #평균
+            elif swl==1: #음의 오차만 발견
                 err=errl
-            elif swr==1: #only right error exists
+            elif swr==1: #양의 오차만 발견
                 err=errr
-            else: #neither
+            else: #아무 오차도 못 발견
                 err=emax
 
-            if err<emin: #bound to minimum error
+            if err<emin: #최소 오차보다 작은 경우
                 err=emin
-            elif emax<err: #bound to maximum error
+            elif emax<err: #최대 오차보다 큰 경우
                 err=emax
 
             errs[j]=err
 
-        dtcs[j]=-(jm+jim1)*delta #new time shift
+        dtcs[j]=-(jm+jim1)*delta #time shift 결정
 
     #stacking
-    zssl=np.zeros(nstkwl+1)
-    zscp=np.zeros(nstkwl+1)
-    lmn=np.rint((-dtmo+dtcs)/delta).astype(int)
+    zssl=np.zeros(shape=nstkwl+1)
+    zscp=np.zeros(shape=nstkwl+1)
+    lmn=np.rint((-dtmo+dtcs)/delta).astype(dtype=int)
 
     for j in range(len(st)):
         zssl+=st[j].data[nstkwb-lmn[j]-1:nstkwb+nstkwl-lmn[j]]
