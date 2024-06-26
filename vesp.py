@@ -51,11 +51,10 @@ center=geometry[-1]
 geometry=geometry[:-1]
 
 #back azimuth
-_,_,baz=gps2dist_azimuth(st[0].stats.sac.evla,st[0].stats.sac.evlo,center[1],center[0])
+_,_,baz=gps2dist_azimuth(lat1=st[0].stats.sac.evla,lon1=st[0].stats.sac.evlo,lat2=center[1],lon2=center[0])
 
 delta=st[0].stats.delta
-n_time=np.rint((tend-tbegin)/delta)
-time=np.arange(stop=n_time+1)*delta+tbegin
+time=np.arange(stop=int((tend-tbegin)/delta)+1)*delta+tbegin
 slow=np.arange(stop=nslow+1)*(maxslow-minslow)/nslow+minslow
 
 #beamforming
