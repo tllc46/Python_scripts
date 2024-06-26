@@ -55,7 +55,7 @@ def covmat():
                 scm[j][i]+=sum(c)
 
 def normalize():
-    trace=np.real(np.trace(scm))
+    trace=np.real(val=np.trace(scm))
     for i in range(nch):
         v=np.real(scm[i][i])
         scale=np.sqrt(trace/(v*nch))
@@ -64,15 +64,15 @@ def normalize():
             scm[j][i]*=scale
 
 def regularize():
-    trace=np.real(np.trace(scm))
+    trace=np.real(val=np.trace(scm))
     offset=trace*eps/nch
     for i in range(nch):
         scm[i][i]+=offset
 
 def mlm():
     #fks/xbbfk.c/eigenanal()
-    w,z=np.linalg.eig(scm)
-    tmp=np.matmul(z,np.diag(1/w))
+    w,z=np.linalg.eig(a=scm)
+    tmp=np.matmul(z,np.diag(v=1/w))
     sinv=np.matmul(tmp,np.conjugate(np.transpose(z)))
     return sinv
 
@@ -81,16 +81,15 @@ def music():
     w,z=np.linalg.eig(scm)
     ind=np.argsort(np.real(w))
     ind=ind[:-1]
-    sinv=np.matmul(z[:,ind],np.conjugate(np.transpose(z[:,ind])))
+    sinv=np.matmul(z[:,ind],np.conjugate(np.transpose(a=z[:,ind])))
     return sinv
 
 def fkevalr():
     #fks/xbbfk.c/fkevalr()
-    wv=np.linspace(-2*np.pi*wavenumber,2*np.pi*wavenumber,ssq)
     for i in range(ssq):
         for j in range(ssq):
             tmp=np.matmul(np.exp(-1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1])),scm)
-            fks[i][j]=np.real(np.matmul(tmp,np.exp(1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1]))))
+            fks[i][j]=np.real(val=np.matmul(tmp,np.exp(1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1]))))
 
 #main
 st=read(pathname_or_url="sacdata/*",format="SAC",byteorder="little")
@@ -103,7 +102,7 @@ for i in range(nch):
     end.append(st[i].stats.endtime)
 start_com=max(start)
 end_com=min(end)
-st=st.slice(start_com,end_com)
+st=st.slice(starttime=start_com,endtime=end_com)
 nsamples=st[0].stats.npts
 
 for i in range(nch):
@@ -112,29 +111,31 @@ for i in range(nch):
 geometry=get_geometry(stream=st,return_center=True)
 center=geometry[-1]
 geometry=geometry[:-1]
-_,_,baz=gps2dist_azimuth(st[0].stats.sac.evla,st[0].stats.sac.evlo,center[1],center[0])
-baz*=np.pi/180
+_,_,baz=gps2dist_azimuth(lat1=st[0].stats.sac.evla,lon1=st[0].stats.sac.evlo,lat2=center[1],lon2=center[0])
+baz=np.radians(baz)
 
-output=np.empty((nch,100),dtype=complex)
-scm=np.zeros((nch,nch),dtype=complex)
-fks=np.empty((ssq,ssq))
-qstates=np.zeros((nch,11))
+output=np.empty(shape=(nch,100),dtype=complex)
+scm=np.zeros(shape=(nch,nch),dtype=complex)
+fks=np.empty(shape=(ssq,ssq))
+qstates=np.zeros(shape=(nch,11))
+k=np.arange(stop=ssq)*2*wavenumber/(ssq-1)+wavenumber
+wv=2*np.pi*k
 
 covmat()
 scm=music()
 fkevalr()
 
 model=TauPyModel(model="ak135")
-arrivals=model.get_travel_times_geo(st[0].stats.sac.evdp,st[0].stats.sac.evla,st[0].stats.sac.evlo,center[1],center[0],phase_list=["P"])
+arrivals=model.get_travel_times_geo(source_depth_in_km=st[0].stats.sac.evdp,source_latitude_in_deg=st[0].stats.sac.evla,source_longitude_in_deg=st[0].stats.sac.evlo,receiver_latitude_in_deg=center[1],receiver_longitude_in_deg=center[0],phase_list=["P"])
 p=arrivals[0].ray_param_sec_degree
-p=p*0.05/111.19 #frequency peak=0.05Hz
+p*=0.05/111.19 #진동수 중심=0.05Hz
 
-k=np.linspace(-wavenumber,wavenumber,ssq)
 kx,ky=np.meshgrid(k,k)
-plt.set_cmap("Reds")
-plt.pcolormesh(kx,ky,1/fks)
-plt.scatter(p*np.cos(baz),p*np.sin(baz),c="blue",s=200,marker="+")
-plt.xlabel("kx(1/km)")
-plt.ylabel("ky(1/km)")
-plt.grid()
+fig=plt.figure()
+ax=fig.subplots()
+ax.pcolormesh(kx,ky,1/fks,cmap="Reds")
+ax.scatter(x=p*np.cos(baz),y=p*np.sin(baz),s=200,c="blue",marker="+")
+ax.set_xlabel(xlabel="kx(1/km)")
+ax.set_ylabel(ylabel="ky(1/km)")
+ax.grid(visible=True)
 plt.show()
