@@ -13,7 +13,7 @@ def analytic(omega):
     else:
         return A*tau
 
-omega=np.pi*np.linspace(start=-1,stop=1,num=N+1)
+omega=np.arange(stop=N+1)*2*np.pi/N-np.pi
 
 dirac=20*2*np.pi/dT*np.ones(shape=len(omega))
 
