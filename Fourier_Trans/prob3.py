@@ -17,14 +17,14 @@ omega=np.arange(stop=N+1)*2*np.pi/N-np.pi
 
 dirac=20*2*np.pi/dT*np.ones(shape=len(omega))
 
-analy=np.array([analytic(omega=omega_) for omega_ in omega])
-analy*=0.1*np.pi #normalization
+analy=np.array(object=[analytic(omega=omega_) for omega_ in omega])
+analy*=0.1*np.pi #정규화
 
 seq=np.arange(stop=N)
 seq_rect=np.concatenate((seq[:int(0.5*tau)+1],seq[-int(0.5*tau):]))
 complex_dft=A*sum(np.exp(-1j*2*np.pi*seq*seq_rect[:,np.newaxis]/N))
 dft=0.1*np.pi*complex_dft.real #normalization
-dft=np.concatenate((dft[int(0.5*N):],dft[:int(0.5*N)+1])) #rearange to make omega's range -pi~pi
+dft=np.concatenate((dft[int(0.5*N):],dft[:int(0.5*N)+1])) #omega 범위가 -pi ~ pi가 되도록 재배열
 
 fig=plt.figure()
 ax=fig.subplots()
