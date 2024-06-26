@@ -71,7 +71,7 @@ nhigh=int(frqhigh/deltaf+0.5)
 nlow=max(1,nlow) #최소 진동수가 0Hz보다는 커야 한다
 nhigh=min(nfft//2-1,nhigh) #최대 진동수가 Nyquist 진동수보다는 작아야 한다
 nf=nhigh-nlow+1 #최소 진동수와 최대 진동수도 포함
-frq=np.linspace(0,fs/2,nfft//2+1) #진동수 범위
+frq=np.fft.rfftfreq(n=nfft//2+1,d=1/fs) #진동수 범위
 
 #5. rfft
 output=np.empty(shape=(nch,nf),dtype=np.complex128)
