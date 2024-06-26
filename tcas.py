@@ -15,6 +15,7 @@ dtcmin=-0.5 #최소 time shift
 dtcmax=0.5 #최대 time shift
 
 #user0 header는 ak135 모형에 근거한 초기 moveout 저장
+#상대적으로 나중에 도착하면 양수, 먼저 도착하면 음수
 #npts는 같을 필요는 없지만, 시작 시각은 모두 같아야 한다
 st=read(pathname_or_url="*.sac.ft.cut",format="SAC",byteorder="little")
 delta=st[0].stats.delta
