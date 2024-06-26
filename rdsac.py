@@ -110,35 +110,35 @@ enum=[0,
 
 logic=[False,True]
 
-with open("NS.N068..HHE.D.2021.280.000000.sac.swap",mode="rb") as file:
-    fhdr=unpack(">70f",file.read(70*4))
+with open(file="NS.N068..HHE.D.2021.280.000000.sac.swap",mode="rb") as file:
+    fhdr=unpack(format=">70f",buffer=file.read(70*4))
     delta=fhdr[0]
-    nhdr=unpack(">40i",file.read(40*4))
+    nhdr=unpack(format=">40i",buffer=file.read(40*4))
     npts=nhdr[9]
-    khdr=file.read(192).decode("ascii")
-    data=unpack(f">{npts}f",file.read(npts*4))
+    khdr=file.read(192).decode(encoding="ascii")
+    data=unpack(format=f">{npts}f",buffer=file.read(npts*4))
 
 float_header=list(fhdr)
 int_header=list(nhdr)
 data=list(data)
-time=np.arange(npts)*delta
+time=np.arange(stop=npts)*delta
 
-#float header
+#실수 header
 for i in range(70):
     if float_header[i]==-12345:
         float_header[i]="undefined"
 
-#integer header
+#정수 header
 for i in range(40):
     if int_header[i]==-12345:
         int_header[i]="undefined"
     else:
-        if 15<=i<=34: #enumerated header
+        if 15<=i<=34: #열거 header
             int_header[i]=enum[int_header[i]]
-        elif 35<=i: #logical header
+        elif 35<=i: #논리 header
             int_header[i]=logic[int_header[i]]
 
-#character header
+#문자 header
 char_header=[]
 for i in range(23):
     if i==0:
@@ -159,7 +159,7 @@ for i in range(23):
     if char_header[i][:6]=="-12345":
         char_header[i]="undefined"
 
-#print header information
+#header 정보 출력
 print("<required fields>")
 print(f"number of points={int_header[9]}")
 print(f"header version={int_header[6]}")
@@ -309,8 +309,8 @@ print(f"enumerated header 19={int_header[33]}")
 print(f"enumerated header 20={int_header[34]}")
 print(f"logical header 5={int_header[39]}")
 
-#plot waveform
+#파형 그림
 fig=plt.figure()
 ax=fig.subplots()
 ax.plot(time,data,color="black")
-fig.savefig("trace.png")
+fig.savefig(fname="trace.png")
