@@ -23,6 +23,6 @@ specfem1d.py: python version specfem1d
 
 specfem2d.py: python version specfem2d
 
-tcas.py: python version tcas, translated astack/tcas.f
+tcas.py
 
 vesp.py: vespagram
