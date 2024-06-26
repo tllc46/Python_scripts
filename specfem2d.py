@@ -129,7 +129,7 @@ coorg[0]=np.tile(A=xrow,reps=nelem_z+1) #x 좌표 [m]
 zcol=zmin+np.arange(stop=nelem_z+1)*(zmax-zmin)/nelem_z
 coorg[1]=np.repeat(a=zcol,repeats=nelem_x+1) #z 좌표 [m]
 
-#형상 함수
+#define_shape_functions
 shape2D[0]=0.25*(xigll[:,np.newaxis]-1)*(zigll-1) #(-1,-1), (ngllx,1) + (ngllz) = (ngllx,ngllz)
 shape2D[1]=-0.25*(xigll[:,np.newaxis]+1)*(zigll-1) #(1,-1)
 shape2D[2]=0.25*(xigll[:,np.newaxis]+1)*(zigll+1) #(1,1)
@@ -194,7 +194,7 @@ if ig!=nglob-1:
 ibool=np.reshape(a=ibool,newshape=(nspec,ngllz,ngllx))
 ibool=np.swapaxes(a=ibool,axis1=0,axis2=2) #(ngllx,ngllz,nspec)
 
-#Jacobian 계산
+#recompute_jacobian
 temp_xxi=dershape2D_z[:,:,np.newaxis]*coorg[0,knods][:,np.newaxis] #(ngnod,ngllz,1) * (ngnod,1,nspec) = (ngnod,ngllz,nspec)
 xxi=sum(temp_xxi) #dx/dxi, (ngllz,nspec)
 
