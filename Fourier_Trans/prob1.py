@@ -14,7 +14,7 @@ def analytic(omega):
         return 0
 
 omega_analy=np.arange(stop=int(6/omega_0)+1)*omega0-3
-omega_dft=arange(stop=N+1)*2/N-1
+omega_dft=arange(stop=N+1)*2*np.pi/N-np.pi
 
 abs_analy=[analytic(omega=omega) for omega in omega_analy]
 angle_analy=np.zeros(shape=len(omega_analy))
