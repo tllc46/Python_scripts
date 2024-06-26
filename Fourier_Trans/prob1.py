@@ -13,17 +13,17 @@ def analytic(omega):
     else:
         return 0
 
-omega_analy=np.arange(start=-3,stop=3+omega0,step=omega0)
-omega_dft=np.pi*np.linspace(start=-1,stop=1,num=N+1)
+omega_analy=np.arange(stop=int(6/omega_0)+1)*omega0-3
+omega_dft=arange(stop=N+1)*2/N-1
 
 abs_analy=[analytic(omega=omega) for omega in omega_analy]
 angle_analy=np.zeros(shape=len(omega_analy))
 
 seq=np.arange(stop=N)
 complex_dft=sum(A*np.cos(omega0*seq[:,np.newaxis])*np.exp(-1j*2*np.pi*seq*seq[:,np.newaxis]/N))
-abs_dft=2*np.pi/128*abs(complex_dft) #normalization
+abs_dft=2*np.pi/128*abs(complex_dft) #정규화
 angle_dft=np.angle(z=complex_dft)
-abs_dft=np.concatenate((abs_dft[int(0.5*N):],abs_dft[:int(0.5*N)+1])) #rearrange to make omega's range -pi~pi
+abs_dft=np.concatenate((abs_dft[int(0.5*N):],abs_dft[:int(0.5*N)+1])) #omega 범위가 -pi ~ pi가 되도록 재배열
 angle_dft=np.concatenate((angle_dft[int(0.5*N):],angle_dft[:int(0.5*N)+1]))
 
 fig=plt.figure(1)
