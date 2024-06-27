@@ -88,7 +88,7 @@ def naver_map():
         #"저장" 버튼
         elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-widget-wrap"]/div[2]/div[3]/button')
         elem.click()
-        print(station_name},"| done saving")
+        print(station_name,"| done saving")
         time.sleep(2)
 
     driver.close()
