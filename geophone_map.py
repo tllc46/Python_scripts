@@ -73,6 +73,7 @@ def naver_map():
             elem=driver.find_element(by=By.XPATH,value='//*[@id="section_content"]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button')
         except:
             print(station_name,"| address doesn't exist, skip without saving")
+            continue
         else:
             elem.click()
             time.sleep(2)
