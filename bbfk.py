@@ -73,13 +73,13 @@ def mlm():
     #fks/xbbfk.c/eigenanal()
     w,z=np.linalg.eig(a=scm)
     tmp=np.matmul(z,np.diag(v=1/w))
-    sinv=np.matmul(tmp,np.conjugate(np.transpose(z)))
+    sinv=np.matmul(tmp,np.conjugate(np.transpose(a=z)))
     return sinv
 
 def music():
     #fks/xbbfk.c/eigenanal()
-    w,z=np.linalg.eig(scm)
-    ind=np.argsort(np.real(w))
+    w,z=np.linalg.eig(a=scm)
+    ind=np.argsort(a=np.real(val=w))
     ind=ind[:-1]
     sinv=np.matmul(z[:,ind],np.conjugate(np.transpose(a=z[:,ind])))
     return sinv
