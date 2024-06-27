@@ -121,8 +121,8 @@ else:
            scm[:,:,i]=np.linalg.pinv(a=scm[:,:,i],rcond=1e-6)
 
 #8. beamforming
-sl_x=np.arange(stop=(slm_x-sll_x)/sl_s)*sl_s+sll_x
-sl_y=np.arange(stop=(slm_y-sll_y)/sl_s)*sl_s+sll_y
+sl_x=np.arange(stop=int((slm_x-sll_x)/sl_s))*sl_s+sll_x
+sl_y=np.arange(stop=int((slm_y-sll_y)/sl_s))*sl_s+sll_y
 sl_x,sl_y=np.meshgrid(sl_x,sl_y)
 if ssm=="coherent":
     fks=np_fk_cssm(sl_x=sl_x,sl_y=sl_y)
