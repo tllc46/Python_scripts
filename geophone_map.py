@@ -69,9 +69,13 @@ def naver_map():
         elem.send_keys(Keys.RETURN)
         time.sleep(2)
         #"저장 추가" 버튼
-        elem=driver.find_element(by=By.XPATH,value='//*[@id="section_content"]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button')
-        elem.click()
-        time.sleep(2)
+        try:
+            elem=driver.find_element(by=By.XPATH,value='//*[@id="section_content"]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button')
+        except:
+            print(station_name,"| address doesn't exist, skip without saving")
+        else:
+            elem.click()
+            time.sleep(2)
         #"메모, 별명, URL 추가" 버튼
         elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-widget-wrap"]/div[2]/div[2]/div/button')
         elem.click()
@@ -79,16 +83,12 @@ def naver_map():
         elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-input-listview-nickname"]')
         elem.send_keys(station_name)
         #리스트 선택
-        elems=driver.find_elements(by=By.CLASS_NAME,value="swt-save-group-item")
-        for elem in elems:
-            sub_elem=elem.find_element(by=By.CLASS_NAME,value="swt-save-group-name") #"폴더명\n<리스트명>"
-            if sub_elem.text.split(sep="\n")[-1]==list_name:
-                break
-        elem=elem.find_element(by=By.CLASS_NAME,value="swt-save-group-info")
+        elem=driver.find_element(by=By.XPATH,value=f'//*[@id="swt-save-widget-wrap"]/div[2]/div[2]/ul/li[button/strong/text()="{list_name}"]/button')
         elem.click()
         #"저장" 버튼
         elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-widget-wrap"]/div[2]/div[3]/button')
         elem.click()
+        print(station_name},"| done saving")
         time.sleep(2)
 
     driver.close()
