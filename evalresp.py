@@ -8,7 +8,7 @@ use_reported_sensitivity=False #기록된 감도 사용
 frequency=10
 output_unit="velocity"
 
-def analog_pz_response(stage,frequency):
+def analog_pz_response(frequency):
     #전달 함수 유형 확인
     if stage.pz_transfer_function_type[:7]=="LAPLACE":
         frequency=2*np.pi*frequency
@@ -26,11 +26,11 @@ def analog_pz_response(stage,frequency):
 
     return numerator/denominator
 
-def digital_coeff_response(stage,frequency):
+def digital_coeff_response(frequency):
     num_coeff=len(stage.numerator)
     coefficient=np.array(object=stage.numerator)
     half=(num_coeff-1)/2
-    degree=np.arange(start=half,stop=-(half+1),step=-1)
+    degree=half-np.arange(stop=num_coeff)
     z=np.exp(2*np.pi*1j*frequency*degree/stage.decimation_input_sample_rate)
 
     return sum(coefficient*z)
@@ -68,12 +68,12 @@ for stage in response.response_stages:
         #gain 조정과 재정규화
         if stage.stage_gain_frequency!=f0:
             if type(stage)==PolesZerosResponseStage: #analog 극점과 영점
-                R=abs(analog_pz_response(stage=stage,frequency=stage.stage_gain_frequency))
-                R0=abs(analog_pz_response(stage=stage,frequency=f0))
+                R=abs(analog_pz_response(frequency=stage.stage_gain_frequency))
+                R0=abs(analog_pz_response(frequency=f0))
                 stage.normalization_frequency=f0
             elif type(stage)==CoefficientsTypeResponseStage: #digital 계수
-                R=abs(digital_coeff_response(stage=stage,frequency=stage.stage_gain_frequency))
-                R0=abs(digital_coeff_response(stage=stage,frequency=f0))
+                R=abs(digital_coeff_response(frequency=stage.stage_gain_frequency))
+                R0=abs(digital_coeff_response(frequency=f0))
             stage.normalization_factor=1/R0 #재정규화
             stage.stage_gain=stage.stage_gain*R0/R #gain도 조정
             stage.stage_gain_frequency=f0
@@ -81,7 +81,7 @@ for stage in response.response_stages:
         #재정규화만
         else:
             if type(stage)==PolesZerosResponseStage and stage.normalization_frequency!=f0: #analog 극점과 영점
-                R0=abs(analog_pz_response(stage=stage,frequency=f0))
+                R0=abs(analog_pz_response(frequency=f0))
                 stage.normalization_factor=1/R0 #A0 정규화 인자 변경
                 stage.normalization_frequency=f0
             elif type(stage)==CoefficientsTypeResponseStage: #digital 계수
@@ -89,9 +89,9 @@ for stage in response.response_stages:
 
     #기기 응답 값 계산
     if type(stage)==PolesZerosResponseStage: #analog 극점과 영점
-        response_value*=analog_pz_response(stage=stage,frequency=frequency)*stage.normalization_factor
+        response_value*=analog_pz_response(frequency=frequency)*stage.normalization_factor
     elif type(stage)==CoefficientsTypeResponseStage: #digial 계수
-        response_value*=digital_coeff_response(stage=stage,frequency=frequency)*stage.normalization_factor
+        response_value*=digital_coeff_response(frequency=frequency)*stage.normalization_factor
         #지연
         if stage.symmetry=="asymmetry": #비대칭 계수
             if use_estimated_delay:
