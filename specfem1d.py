@@ -63,11 +63,11 @@ lagrange_deriv={2:np.array(
 
 def endw1(n,alpha,beta): #xi=-1 GLL 점의 가중치
     #중요: n은 GLL 점 개수(ngll)-1, 원래 코드와 통일
-    return 2**(alpha+beta+1)*(beta+1)*gamma(z=beta+1)**2*gamma(z=n)*gamma(z=n+alpha+1)/(gamma(z=n+beta+1)*gamma(z=n+alpha+beta+2))
+    return 2**(alpha+beta+1)*(beta+1)*gamma(beta+1)**2*gamma(n)*gamma(n+alpha+1)/(gamma(n+beta+1)*gamma(n+alpha+beta+2))
 
 def endw2(n,alpha,beta): #xi=1 GLL 점의 가중치
     #중요: n은 GLL 점 개수(ngll)-1, 원래 코드와 통일
-    return 2**(alpha+beta+1)*(alpha+1)*gamma(z=alpha+1)**2*gamma(z=n)*gamma(z=n+beta+1)/(gamma(z=n+alpha+1)*gamma(z=n+alpha+beta+2))
+    return 2**(alpha+beta+1)*(alpha+1)*gamma(alpha+1)**2*gamma(n)*gamma(n+beta+1)/(gamma(n+alpha+1)*gamma(n+alpha+beta+2))
 
 #zwgljd
 xigll,wgll=roots_jacobi(n=ngll-2,alpha=1,beta=1) #xi_gll, weight_gll
