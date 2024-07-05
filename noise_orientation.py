@@ -1,284 +1,401 @@
-from datetime import datetime,timedelta
+import glob
 from os.path import exists
 from os import mkdir
+from sys import stderr
 from pprint import pprint
 
 import numpy as np
 import numpy.ma as ma
-from scipy.signal import correlate
 
 from obspy import read,read_inventory,UTCDateTime,Trace,Stream
 from obspy.signal.util import next_pow_2
 from obspy.geodetics import gps2dist_azimuth
 from obspy.io.sac import SACTrace
 
-subwin_start=UTCDateTime("2020-04-01")
-endtime=UTCDateTime("2020-04-05")
-subwin_length=3600
-subwin_overlap=0.5
-sampling_rate=10
-delta=1/sampling_rate
-subwin_end=subwin_start+subwin_length
-nfreq=next_pow_2(i=subwin_length*sampling_rate)
-nlag=2048
-npwing=40
-freqmin=0.015
-freqmax=4.5
-nmin=int(np.ceil(freqmin*nfreq/sampling_rate))
-nmax=int(np.floor(freqmax*nfreq/sampling_rate))
-win_length=3600*24
-win_overlap=0.5
-win_no=0
-max_subwin=int(win_length/(subwin_length*(1-subwin_overlap)))
-next_subwin=int(win_length*(1-subwin_overlap)/(subwin_length*(1-subwin_overlap)))
-n_close=20
+sec_1d=86400
 
-julday_ls=0
-nsubwin_ls=[]
+len_sub=3600
+shift_sub=0.5*len_sub
+
+n_sub_1d=int(sec_1d/shift_sub)
+
+n_sub_tot=24
+n_sub_shift=int(0.5*n_sub_tot)
+
+sampling_rate_0=200
+sampling_rate=10
+factor=int(sampling_rate_0/sampling_rate)
+delta=1/sampling_rate
+
+npts_sub=sampling_rate*len_sub
+n_freq=next_pow_2(i=npts_sub)
+freq_min=0.015
+freq_max=4.5
+f_min_idx=int(np.ceil(freq_min*n_freq/sampling_rate))
+f_max_idx=int(np.floor(freq_max*n_freq/sampling_rate))
+n_mov_win=40
+n_lag=2048
+n_rfft=int(0.5*n_freq)+1
+
+n_close=5
+
+year=2020
+start_julday=92
+end_julday=96
+start_1d=UTCDateTime(year=year,julday=start_julday)
+
+net=read_inventory(path_or_file_object="stameta_NS",format="STATIONTXT",level="station")[0]
+n_sta=len(net)
+
+code_idx={}
+pair_idx=np.empty(shape=(n_sta,n_close),dtype=int)
+idx_pair=[]
+sym_idx=np.zeros(shape=(n_sta,n_close,2),dtype=int)
+
+avg_i_ls=[1]
+n_sub_ls=[]
+ZZ_ls=[]
+NZ_ls=[]
+EZ_ls=[]
+n_ZZ_ls=[]
+n_NZ_ls=[]
+n_EZ_ls=[]
+
 st_Z=Stream()
 st_N=Stream()
 st_E=Stream()
 
-def preprocess(code,component):
-    if not exists(path=f"/home/tllc46/NSNAS/{.code}/HH{component}/NS.{code}.HH{component}.{subwin_end.year}.{subwin_end.julday:03}"): #miniseed 파일이 없다
-        file.write(f"{code} {component} | no data\n")
-        return None #제외
-    else: #miniseed 파일 존재
-        st_temp=read(pathname_or_url=f"/home/tllc46/NSNAS/{code}/HH{component}/*{subwin_end.year}.{subwin_end.julday:03}",format="MSEED",header_byteorder=">")
+bool_sub_Z=np.full(shape=n_sta,fill_value=False)
+bool_sub_N=np.full(shape=n_sta,fill_value=False)
+bool_sub_E=np.full(shape=n_sta,fill_value=False)
+bool_sub=np.full(shape=n_sta,fill_value=False)
+
+spec_Z=np.empty(shape=(n_sta,n_rfft),dtype=complex)
+spec_N=np.empty(shape=(n_sta,n_rfft),dtype=complex)
+spec_E=np.empty(shape=(n_sta,n_rfft),dtype=complex)
+
+sym_fill=np.full(shape=(n_sta,n_close),fill_value=False)
+
+def code_idx_map():
+    global code_idx,pair_idx,idx_pair,sym_idx
+    sta_idx=np.zeros(shape=(n_sta,n_sta),dtype=int)
+
+    for i in range(n_sta):
+        code_idx[net[i].code]=i
+
+    for i in range(n_sta):
+        idx_pair.append([])
+        i_idx=code_idx[net[i].code]
+        gcarc_ls=[]
+        for j in range(n_sta):
+            if i!=j:
+                gcarc_ls.append([gps2dist_azimuth(lat1=net[i].latitude,lon1=net[i].longitude,lat2=net[j].latitude,lon2=net[j].longitude)[0],net[j].code])
+        gcarc_ls.sort()
+        for j in range(n_close): #i번째 지진계와 가장 가까운 n_close개 지진계만
+            j_idx=code_idx[gcarc_ls[j][1]]
+            sta_idx[i_idx,j_idx]=j+1
+            idx_pair[-1].append(gcarc_ls[j][1])
+
+    for i in range(n_sta): #대칭 검사
+        for j in range(i+1,n_sta):
+            if sta_idx[i,j] and sta_idx[j,i]:
+                sym_idx[i,sta_idx[i,j]-1]=[j+1,sta_idx[j,i]]
+
+    for i in range(n_sta):
+        for j in range(n_sta):
+            if sta_idx[i,j]:
+                pair_idx[i,sta_idx[i,j]-1]=j+1
+
+def new_avg():
+    global n_avg
+
+    new_avg_i=avg_i_ls[-1]
+
+    print(f"{new_avg_i:02} average window start",file=stderr)
+
+    if not exists(path=f"/media/tllc46/data01/Orientation/{new_avg_i:02}"):
+        mkdir(path=f"/media/tllc46/data01/Orientation/{new_avg_i:02}")
+    for i in ["Z","N","E"]:
+        if not exists(path=f"/media/tllc46/data01/Orientation/{new_avg_i:02}/{i}Z"):
+            mkdir(path=f"/media/tllc46/data01/Orientation/{new_avg_i:02}/{i}Z")
+
+    n_sub_ls.append(0)
+    n_avg=len(n_sub_ls)
+    avg_i_ls.append(new_avg_i+1)
+    ZZ_ls.append(np.zeros(shape=(n_sta,n_close,2*n_lag+1)))
+    NZ_ls.append(np.zeros(shape=(n_sta,n_close,2*n_lag+1)))
+    EZ_ls.append(np.zeros(shape=(n_sta,n_close,2*n_lag+1)))
+    n_ZZ_ls.append(np.zeros(shape=(n_sta,n_close),dtype=int))
+    n_NZ_ls.append(np.zeros(shape=(n_sta,n_close),dtype=int))
+    n_EZ_ls.append(np.zeros(shape=(n_sta,n_close),dtype=int))
+
+def read_data(julday,code,component):
+    pathname=f"/home/tllc46/NSNAS/{code}/HH{component}/*.{year}.{julday:03}"
+    if not glob.glob(pathname=pathname):
+        print(f"{code} {component} no data",file=stderr)
+        return None
+    else:
+        st_temp=read(pathname_or_url=pathname,format="MSEED",header_byteorder=">")
         st_temp.merge(method=1)
         tr_temp=st_temp[0]
-        if type(tr_temp.data)==ma.MaskedArray: #공백 존재
-            file.write(f"{code} {component} | discontinous data\n")
-            return None #제외
-        tr_temp.decimate(factor=int(tr_temp.stats.sampling_rate/sampling_rate),no_filter=True) #decimate
-        tr_temp.filter(type="bandpass",freqmin=freqmin,freqmax=freqmax,zerophase=True) #대역 통과 필터
-        if tr_temp.stats.component=="X": #성분 이름 수정
+        if type(tr_temp.data)==ma.MaskedArray:
+            print(f"{code} {component} discontinous data",file=stderr)
+            return None
+        if tr_temp.stats.component=="X":
             tr_temp.stats.component="E"
         elif tr_temp.stats.component=="Y":
             tr_temp.stats.component="N"
+        tr_temp.decimate(factor=factor)
+        tr_temp.filter(type="bandpass",freqmin=freq_min,freqmax=freq_max,zerophase=True)
+
         return tr_temp
 
-def new_julday():
+def new_julday(julday):
     global st_Z,st_N,st_E
-    file.write("reading new data start\n")
-    for i in range(len(net)): #각 지진계마다
-        tr_temp=preprocess(code=net[i].code,component="Z")
-        if not tr_temp: #Z축 성분이 존재하지 않다
-            file.write("
+
+    print("reading data start",file=stderr)
+
+    for i in range(n_sta):
+        #Z
+        tr_temp=read_data(julday=julday,code=net[i].code,component="Z")
+        if not tr_temp:
+            print(f"no {net[i].code} Z, skip reading N, E",file=stderr)
             continue
         else:
             st_Z+=tr_temp
 
-        tr_temp=preprocess(code=net[i].code,componenet="N")
-        if not tr_temp: #N축 성분이 존재하지 않다
+        #N
+        tr_temp=read_data(julday=julday,code=net[i].code,component="N")
+        if not tr_temp:
+            print(f"no {net[i].code} N, skip reading E",file=stderr)
             continue
         else:
             st_N+=tr_temp
 
-        tr_temp=preprocess(code=net[i].code,component="E")
+        #E
+        tr_temp=read_data(julday=julday,code=net[i].code,component="E")
         if tr_temp:
             st_E+=tr_temp
-    file.write("reading new data end\n")
-            
-    st_Z.merge()
-    st_Z.trim(starttime=subwin_start,endtime=UTCDateTime(year=subwin_end.year,julday=subwin_end.julday)+86400-delta,pad=True)
-    st_N.merge()
-    st_N.trim(starttime=subwin_start,endtime=UTCDateTime(year=subwin_end.year,julday=subwin_end.julday)+86400-delta,pad=True)
-    st_E.merge()
-    st_E.trim(starttime=subwin_start,endtime=UTCDateTime(year=subwin_end.year,julday=subwin_end.julday)+86400-delta,pad=True)
+
+    print("reading data end\n",file=stderr)
+
+    st_Z.merge(method=1)
+    st_N.merge(method=1)
+    st_E.merge(method=1)
+
+def gap_check():
+    global n_Z,n_N,n_E
+
+    print("gap check",file=stderr)
+
+    for st_i in [st_sub_Z,st_sub_N,st_sub_E]:
+        j=0
+        while j<len(st_i):
+            tr_j=st_i[j]
+            if type(tr_j.data)==ma.MaskedArray and tr_j.data.count()<0.5*len_sub*sampling_rate or len(tr_j.data)<0.5*len_sub*sampling_rate:
+                print(f"{tr_j.stats.station} {tr_j.stats.component} gap is too large",file=stderr)
+                st_i.pop(index=j)
+                continue
+            if type(tr_j.data)==ma.MaskedArray:
+                tr_j[j].data.filled(fill_value=0)
+            j+=1
+
+    n_Z=len(st_sub_Z)
+    n_N=len(st_sub_N)
+    n_E=len(st_sub_E)
+
+def sanity_check():
+    global bool_sub,bool_sub_Z,bool_sub_N,bool_sub_E
+    global spec_Z,spec_N,spec_E
+
+    bool_sub_Z[:]=False
+    bool_sub_N[:]=False
+    bool_sub_E[:]=False
+
+    #Z
+    for i in range(n_Z):
+        idx=code_idx[st_sub_Z[i].stats.station]
+        bool_sub_Z[idx]=True
+
+    #N
+    for i in range(n_N):
+        idx=code_idx[st_sub_N[i].stats.station]
+        bool_sub_N[idx]=True
+
+    #E
+    for i in range(n_E):
+        idx=code_idx[st_sub_E[i].stats.station]
+        bool_sub_E[idx]=True
+
+    bool_sub[:]=bool_sub_Z & bool_sub_N & bool_sub_E
 
 def fourier_trans(data):
-    if type(data)==ma.MaskedArray:
-        data=data.filled(fill_value=0) #공백은 0으로 채운다
-    spectrum=np.fft.rfft(a=np.sign(data),n=nfreq) #1비트 정규화, Fourier 변환
-    norm=correlate(in1=abs(spectrum),in2=np.ones(shape=2*npwing+1),mode="valid") #npwing 길이의 이동 평균
-    result=np.zeros(shape=int(nfreq/2+1),dtype=complex)
-    result[nmin:nmax+1]=spectrum[nmin:nmax+1]/norm[nmin-npwing:nmax+1-npwing]*(2*npwing+1) #spectral whitening
+    spectrum=np.fft.rfft(a=np.sign(data),n=n_freq) #1비트 정규화, Fourier 변환
+    norm=np.convolve(a=abs(spectrum),v=np.ones(shape=2*n_mov_win+1),mode="valid") #npwing 길이의 이동 평균
+    result=np.zeros(shape=int(0.5*n_freq)+1,dtype=complex)
+    result[f_min_idx:f_max_idx+1]=spectrum[f_min_idx:f_max_idx+1]/norm[f_min_idx-n_mov_win:f_max_idx+1-n_mov_win]*(2*n_mov_win+1) #spectral whitening
     return result
 
+def spectra():
+    global spec_Z,spec_N,spec_E
+
+    #Z
+    for i in range(n_Z):
+        idx=code_idx[st_sub_Z[i].stats.station]
+        if bool_sub_Z[idx]:
+            spec_Z[idx]=fourier_trans(data=st_sub_Z[i].data)
+
+    #N
+    for i in range(n_N):
+        idx=code_idx[st_sub_N[i].stats.station]
+        if bool_sub[idx]:
+            spec_N[idx]=fourier_trans(data=st_sub_N[i].data)
+
+    #E
+    for i in range(n_E):
+        idx=code_idx[st_sub_E[i].stats.station]
+        if bool_sub_E[idx]:
+            spec_E[idx]=fourier_trans(data=st_sub_E[i].data)
+
 def cross_correlate(spectrum1,spectrum2):
-    norm=np.abs(spectrum1)*np.abs(spectrum2) #정규화 인자
+    norm=abs(spectrum1)*abs(spectrum2) #정규화 인자
     norm[0<norm]=1/norm[0<norm]
     corr_spec=spectrum1*np.conjugate(spectrum2)*norm
     corr=np.fft.irfft(a=corr_spec) #역 Fourier 변환
-    corr=np.real(np.concatenate((corr[-nlag:],corr[:nlag+1]))) #time lag까지만 자르다
+    corr=np.real(val=np.concatenate((corr[-n_lag:],corr[:n_lag+1]))) #time lag까지만 자르다
     return corr
 
-def C_new_win():
-    global nsubwin_ls,C_ZZ,C_NZ,C_EZ
-    if not exists(path=f"/media/tllc46/data01/Orientation/{win_no+1:02}"):
-        mkdir(path=f"/media/tllc46/data01/Orientation/{win_no+1:02}")
-    for i in ["Z","N","E"]:
-        if not exists(path=f"/media/tllc46/data01/Orientation/{win_no+1:02}/{i}Z"):
-            mkdir(path=f"/media/tllc46/data01/Orientation/{win_no+1:02}/{i}Z")
-    nsubwin_ls.append(0)
-    for i in C_ZZ:
-        C_ZZ[i].append([np.zeros(shape=2*nlag+1),0])
-    for i in C_NZ:
-        C_NZ[i].append([np.zeros(shape=2*nlag+1),0])
-        C_EZ[i].append([np.zeros(shape=2*nlag+1),0])
+def stacking():
+    global ZZ_ls,NZ_ls,EZ_ls
+    global n_ZZ_ls,n_NZ_ls,n_EZ_ls
+    global sym_fill
 
-def C_old_win():
-    global win_no,nsubwin_ls,C_ZZ,C_NZ,C_EZ
-    win_no+=1
-    nsubwin_ls.pop(0)
-    for i in C_ZZ:
-        subwin=C_ZZ[i].pop(0)
-        if subwin[1]:
-            data=subwin[0]/subwin[1]
-            tr=Trace(data=data,header={"delta":delta})
-            sac=SACTrace.from_obspy_trace(trace=tr)
-            sac.user0=subwin[1]
-            sac.write(dest=f"/media/tllc46/data01/Orientation/{win_no:02}/ZZ/{i}.SAC")
-    for i in C_NZ:
-        subwin=C_NZ[i].pop(0)
-        if subwin[1]:
-            data=subwin[0]/subwin[1]
-            tr=Trace(data=data,header={"delta":delta})
-            sac=SACTrace.from_obspy_trace(trace=tr)
-            sac.user0=subwin[1]
-            sac.write(dest=f"/media/tllc46/data01/Orientation/{win_no:02}/NZ/{i}.SAC")
-        subwin=C_EZ[i].pop(0)
-        if subwin[1]:
-            data=subwin[0]/subwin[1]
-            tr=Trace(data=data,header={"delta":delta})
-            sac=SACTrace.from_obspy_trace(trace=tr)
-            sac.user0=subwin[1]
-            sac.write(dest=f"/media/tllc46/data01/Orientation/{win_no:02}/EZ/{i}.SAC")
+    sym_fill[:,:]=False
 
-file=open(file="debug.txt",mode="w")
+    for i in range(n_sta): #행 방향
+        for j in range(n_close): #열 방향
+            idx=pair_idx[i,j]-1
+            if bool_sub_Z[idx]:
 
-net=read_inventory(path_or_file_object="stameta_NS",format="STATIONTXT",level="station")[0] #network
-n_sta=len(net)
-code_idx={}
-for i in range(n_sta):
-    code_idx[net[i].code]=i
-file.write("station code - index mapping\n")
-pprint(object=code_idx,stream=file)
-file.write("\n")
+                #Z
+                if bool_sub[i]:
+                    if not sym_fill[i,j]:
+                        corr=cross_correlate(spectrum1=spec_Z[i],spectrum2=spec_Z[idx])
+                        for k in range(n_avg):
+                            ZZ_ls[k][i,j]+=corr
+                            n_ZZ_ls[k][i,j]+=1
 
-r_s_idx=np.zeros(shape=(n_sta,n_sta),dtype=int)
-for i in range(n_sta):
-    r_idx=code_idx[net[i].code] #지진계
-    gcarc_ls=[]
-    for j in range(n_sta):
-        if i!=j:
-            gcarc_ls.append([gps2dist_azimuth(lat1=net[i].latitude,lon1=net[i].longitude,lat2=net[j].latitude,lon2=net[j].longitude)[0],net[j].code])
-    gcarc_ls.sort()
-    for j in range(n_close): #i번째 지진계와 가장 가까운 20개 지진계만
-        s_idx=code_idx[gcarc_ls[j][1]] #source
-        r_s_idx[r_idx,s_idx]=j+1
-file.write("station pairs - index mapping\n")
-pprint(object=r_s_idx,stream=file)
-file.write("\n")
+                    i_idx=sym_idx[i,j,0]-1
+                    j_idx=sym_idx[i,j,1]-1
+                    p_idx=pair_idx[i_idx,j_idx]-1
+                    if sym_idx[i,j].any() and bool_sub[i_idx] and bool_sub_Z[p_idx] and not sym_fill[i_idx,j_idx]:
+                        sym_fill[i_idx,j_idx]=True
+                        for k in range(n_avg):
+                            ZZ_ls[k][i_idx,j_idx]+=corr[::-1]
+                            n_ZZ_ls[k][i_idx,j_idx]+=1
 
-C_new_win()
+                #N
+                if bool_sub[i]:
+                    corr=cross_correlate(spectrum1=spec_N[i],spectrum2=spec_Z[idx])
+                    for k in range(n_avg):
+                        NZ_ls[k][i,j]+=corr
+                        n_NZ_ls[k][i,j]+=1
 
-while subwin_end<=endtime:
-    file.write(f"new subwindow starts | {subwin_start} ~ {subwin_end}\n")
-    #새 trace 추가
-    if subwin_end.julday!=julday_ls: #새 Julian일 시작
-        julday_ls=subwin_end.julday
-        file.write(f"new Julian day starts | {julday_ls}\n")
-        new_julday()
+                #E
+                if bool_sub[i]:
+                    corr=cross_correlate(spectrum1=spec_E[i],spectrum2=spec_Z[idx])
+                    for k in range(n_avg):
+                        EZ_ls[k][i,j]+=corr
+                        n_EZ_ls[k][i,j]+=1
 
-    #부구간으로만 자르다
-    st_subwin_Z=st_Z.slice(starttime=subwin_start,endtime=subwin_end)
-    st_subwin_N=st_N.slice(starttime=subwin_start,endtime=subwin_end)
-    st_subwin_E=st_E.slice(starttime=subwin_start,endtime=subwin_end)
+def old_jul_day():
+    global start_1d
 
-    #공백 검사
-    for st_i in [st_subwin_Z,st_subwin_N,st_subwin_E]:
-        j=0
-        while j<len(st_i): #for all traces
-            if type(st_i[j].data)==ma.MaskedArray and st_i[j].data.count()<subwin_length*sampling_rate*0.5: #공백이 부구간 길이의 50%보다 큰 경우
-                st_i.pop(index=j)
-                continue
-            j+=1
+    print(f"{i:03} Julian day end",file=stderr)
 
-    n_tr_Z=len(st_subwin_Z)
-    n_tr_N=len(st_subwin_N)
-    n_tr_E=len(st_subwin_E)
+    start_1d+=sec_1d
+    st_Z.trim(starttime=start_1d)
+    st_N.trim(starttime=start_1d)
+    st_E.trim(starttime=start_1d)
 
-    #sanity check
-    for i in range(n_tr_Z):
-        r_idx=code_idx[st_subwin_Z[i].stats.station]
-        for j in range(i+1,n_tr_Z):
-            sym=0
-            s_idx=code_idx[st_subwin_Z[j].stats.station]
-            if r_s_idx[r_idx,s_idx]:
-                subwin_idx_Z[r_idx,r_s_idx[r_idx,s_idx]-1]=[i+1,j+1]
-                sym+=1
-            if r_s_idx[s_idx,r_idx]:
-                subwin_idx_Z[s_idx,r_s_idx[s_idx,r_idx]-1]=[i+1,j+1]
-                sym+=1
-            if sym==2:
-                sym_flag[s_idx,r_s_idx[s_idx,r_idx]-1]=True
-        for j in range(n_tr_N):
-            s_idx=code_idx[st_subwin_N[j].stats.station]
-            if r_s_idx[s_idx,r_idx]:
-                subwin_idx_N[s_idx,r_s_idx[s_idx,r_idx]-1]=[j+1,i+1]
-        for j in range(n_tr_E):
-            s_idx=code_idx[st_subwin_E[j].stats.station]
-            if r_s_idx[s_idx,r_idx]:
-                subwin_idx_E[s_idx,r_s_idx[s_idx,r_idx]-1]=[j+1,i+1]
+def old_avg():
+    global n_avg
+
+    old_avg_i=avg_i_ls.pop(0)
+
+    print(f"{old_avg_i:02} average window end\n",file=stderr)
+
+    n_sub_ls.pop(0)
+    n_avg=len(n_sub_ls)
+    avg_ZZ=ZZ_ls.pop(0)
+    avg_NZ=NZ_ls.pop(0)
+    avg_EZ=EZ_ls.pop(0)
+    n_sub_ZZ=n_ZZ_ls.pop(0)
+    n_sub_NZ=n_NZ_ls.pop(0)
+    n_sub_EZ=n_EZ_ls.pop(0)
 
     for i in range(n_sta):
         for j in range(n_close):
-            if not subwin_idx_Z[i,j] 
-                
-    #cross correlate
-    for i in range(len(vertical)):
-        for j in range(i+1,len(vertical)):
-            hor_exists=False
-            st_i=st_subwin.select(station=vertical[i]) #E, N, Z order
-            st_j=st_subwin.select(station=vertical[j])
-            if len(st_i)==3 and f"{vertical[i]}-{vertical[j]}" in C_EZ: #cross correlate Ni-Zj, Ei-Zj
-                hor_exists=True
-                spec_Zj=fourier_trans(st_j[-1].data)
-                spec_Ei=fourier_trans(st_i[0].data)
-                corr=cross_correlate(spec_Ei,spec_Zj)
-                for k in range(len(C_EZ[f"{vertical[i]}-{vertical[j]}"])):
-                    C_EZ[f"{vertical[i]}-{vertical[j]}"][k][0]+=corr
-                    C_EZ[f"{vertical[i]}-{vertical[j]}"][k][1]+=1
-                spec_Ni=fourier_trans(st_i[1].data)
-                corr=cross_correlate(spec_Ni,spec_Zj)
-                for k in range(len(C_EZ[f"{vertical[i]}-{vertical[j]}"])):
-                    C_NZ[f"{vertical[i]}-{vertical[j]}"][k][0]+=corr
-                    C_NZ[f"{vertical[i]}-{vertical[j]}"][k][1]+=1
+            #Z
+            if n_sub_ZZ[i,j]:
+                data=avg_ZZ[i,j]/n_sub_ZZ[i,j]
+                sac=SACTrace.from_obspy_trace(trace=Trace(data=data,header={"delta":delta}))
+                sac.user0=n_sub_ZZ[i,j]
+                path=f"/media/tllc46/data01/Orientation/{old_avg_i:02}/ZZ/{net[i].code}-{idx_pair[i][j]}.SAC"
+                sac.write(dest=path)
 
-            if len(st_j)==3 and f"{vertical[j]}-{vertical[i]}" in C_EZ: #cross correlate Nj-Zi, Ej-Zi
-                hor_exists=True
-                spec_Zi=fourier_trans(st_i[-1].data)
-                spec_Ej=fourier_trans(st_j[0].data)
-                corr=cross_correlate(spec_Ej,spec_Zi)
-                for k in range(len(C_EZ[f"{vertical[j]}-{vertical[i]}"])):
-                    C_EZ[f"{vertical[j]}-{vertical[i]}"][k][0]+=corr
-                    C_EZ[f"{vertical[j]}-{vertical[i]}"][k][1]+=1
-                spec_Nj=fourier_trans(st_j[1].data)
-                corr=cross_correlate(spec_Nj,spec_Zi)
-                for k in range(len(C_EZ[f"{vertical[j]}-{vertical[i]}"])):
-                    C_NZ[f"{vertical[j]}-{vertical[i]}"][k][0]+=corr
-                    C_NZ[f"{vertical[j]}-{vertical[i]}"][k][1]+=1
+            #N
+            if n_sub_NZ[i,j]:
+                data=avg_NZ[i,j]/n_sub_NZ[i,j]
+                sac=SACTrace.from_obspy_trace(trace=Trace(data=data,header={"delta":delta}))
+                sac.user0=n_sub_NZ[i,j]
+                path=f"/media/tllc46/data01/Orientation/{old_avg_i:02}/NZ/{net[i].code}-{idx_pair[i][j]}.SAC"
+                sac.write(dest=path)
 
-            if hor_exists: #cross correlate Zi-Zj
-                corr=cross_correlate(spec_Zi,spec_Zj)
-                for k in range(len(C_ZZ[f"{vertical[i]}-{vertical[j]}"])):
-                    C_ZZ[f"{vertical[i]}-{vertical[j]}"][k][0]+=corr
-                    C_ZZ[f"{vertical[i]}-{vertical[j]}"][k][1]+=1
-    
-    print(f"sub-window ends: {subwin_start} ~ {subwin_end}")
+            #E
+            if n_sub_EZ[i,j]:
+                data=avg_EZ[i,j]/n_sub_EZ[i,j]
+                sac=SACTrace.from_obspy_trace(trace=Trace(data=data,header={"delta":delta}))
+                sac.user0=n_sub_EZ[i,j]
+                path=f"/media/tllc46/data01/Orientation/{old_avg_i:02}/EZ/{net[i].code}-{idx_pair[i][j]}.SAC"
+                sac.write(dest=path)
 
-    for i in range(len(nsubwin_ls)):
-        nsubwin_ls[i]+=1
+#main
+code_idx_map()
+new_julday(julday=start_julday)
+new_avg()
 
-    if nsubwin_ls[0]==max_subwin:
-        C_old_win()
+st_Z.trim(starttime=start_1d,pad=True)
+st_N.trim(starttime=start_1d,pad=True)
+st_E.trim(starttime=start_1d,pad=True)
 
-    if nsubwin_ls[-1]==next_subwin:
-        C_new_win()
+for i in range(start_julday,end_julday+1):
+    print(f"{i:03} Julian day starting...",file=stderr)
+    new_julday(julday=i+1)
+    st_Z.trim(endtime=start_1d+2*sec_1d-delta,pad=True)
 
-    subwin_start+=subwin_length*(1-win_overlap)
-    subwin_end+=subwin_length*(1-win_overlap)
+    for j in range(n_sub_1d):
+        print(f"{j+1:02}/{n_sub_1d} sub window starting...",file=stderr)
 
-file.close()
+        if n_sub_ls[-1]==n_sub_shift:
+            new_avg()
+
+        start_sub=start_1d+j*shift_sub
+        st_sub_Z=st_Z.slice(starttime=start_sub,endtime=start_sub+len_sub-delta)
+        st_sub_N=st_N.slice(starttime=start_sub,endtime=start_sub+len_sub-delta)
+        st_sub_E=st_E.slice(starttime=start_sub,endtime=start_sub+len_sub-delta)
+
+        gap_check()
+        sanity_check()
+        spectra()
+        stacking()
+
+        for k in range(n_avg):
+            n_sub_ls[k]+=1
+
+        if n_sub_ls[0]==n_sub_tot:
+            old_avg()
+
+        print(f"{j+1:02}/{n_sub_1d} sub window end\n",file=stderr)
+
+    old_jul_day()
