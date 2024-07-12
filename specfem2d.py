@@ -281,6 +281,7 @@ for it in range(nstep):
 
     seismogram.append(displ[1,ibool[igll_receiver,jgll_receiver,nspec_receiver]])
 
-with open(file="seismogram.txt",mode="w") as file:
-    for it in range(nstep):
-        file.write(f"{it*deltat} {seismogram[it]}\n")
+file=open(file="seismogram.txt",mode="w")
+for it in range(nstep):
+    file.write(f"{it*deltat} {seismogram[it]}\n")
+file.close()
