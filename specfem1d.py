@@ -86,7 +86,7 @@ while index<int(ngll**2/2): #hprime은 부호만 반대일 뿐 점대칭 행렬�
     elif i==j and 0<i and 0<j:
         hprime.append(0)
     else:
-        hprime.append(eval_legendre(n=ngll-1,x=xigll[i])/(eval_legendre(n=ngll-1,x=xigll[j])*(xigll[i]-xigll[j]))) #l_j'(xi_i)
+        hprime.append(eval_legendre(ngll-1,xigll[i])/(eval_legendre(ngll-1,xigll[j])*(xigll[i]-xigll[j]))) #l_j'(xi_i)
     index+=1
 
 if ngll%2: #ngll이 홀수
