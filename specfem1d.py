@@ -144,8 +144,9 @@ for it in range(nstep):
 
     #writeOutSnapshots
     if not (it+1)%nsnap:
-        with open(file=f"OUTPUT_FILES/snapshot_forward_normal{it+1:05}",mode="w") as file:
-            for i in range(nglob):
-                file.write(f"{x[i]} {displ[i]}\n")
+        file=open(file=f"OUTPUT_FILES/snapshot_forward_normal{it+1:05}",mode="w")
+        for i in range(nglob):
+            file.write(f"{x[i]} {displ[i]}\n")
+        file.close()
 
     seismogram.append(displ[ireceiver])
