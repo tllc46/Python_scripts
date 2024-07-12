@@ -110,13 +110,14 @@ enum=[0,
 
 logic=[False,True]
 
-with open(file="NS.N068..HHE.D.2021.280.000000.sac.swap",mode="rb") as file:
-    fhdr=unpack(format=">70f",buffer=file.read(70*4))
-    delta=fhdr[0]
-    nhdr=unpack(format=">40i",buffer=file.read(40*4))
-    npts=nhdr[9]
-    khdr=file.read(192).decode(encoding="ascii")
-    data=unpack(format=f">{npts}f",buffer=file.read(npts*4))
+file=open(file="NS.N068..HHE.D.2021.280.000000.sac.swap",mode="rb")
+fhdr=unpack(">70f",file.read(70*4))
+delta=fhdr[0]
+nhdr=unpack(">40i",file.read(40*4))
+npts=nhdr[9]
+khdr=file.read(192).decode(encoding="ascii")
+data=unpack(f">{npts}f",file.read(npts*4))
+file.close()
 
 float_header=list(fhdr)
 int_header=list(nhdr)
