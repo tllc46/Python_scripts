@@ -95,7 +95,7 @@ def define_derivation_matrices(zgll,ngll):
         elif i==j and 0<i and 0<j:
             hprime.append(0)
         else:
-            hprime.append(eval_legendre(n=ngll-1,x=zgll[i])/(eval_legendre(n=ngll-1,x=zgll[j])*(zgll[i]-zgll[j]))) #l_j'(xi_i)
+            hprime.append(eval_legendre(ngll-1,zgll[i])/(eval_legendre(ngll-1,zgll[j])*(zgll[i]-zgll[j]))) #l_j'(xi_i)
         index+=1
 
     if ngll%2: #ngll이 홀수
@@ -266,7 +266,7 @@ for it in range(nstep):
 
         tempx2=wxgll[:,np.newaxis]*jacobian[:,:,i]*(sigma_xx*gammax[:,:,i]+sigma_zx*gammaz[:,:,i]) #(ngllx,1) * (ngllx,ngllz) = (ngllx,ngllz)
         tempz2=wxgll[:,np.newaxis]*jacobian[:,:,i]*(sigma_xz*gammax[:,:,i]+sigma_zz*gammaz[:,:,i])
-        
+
         tempx3=tempx1[:,np.newaxis]*hprimewgll_xx[:,:,np.newaxis] #(ngllx,1,ngllz) * (ngllx,ngllx,1) = (ngllx,ngllx,ngllz)
         tempx4=np.swapaxes(a=tempx2,axis1=0,axis2=1)[:,:,np.newaxis]*hprimewgll_zz[:,np.newaxis] #(ngllz,ngllx,1) * (ngllz,1,ngllz) = (ngllz,ngllx,ngllz)
         accel[0,ibool[:,:,i]]-=sum(tempx3)+sum(tempx4) #(ngllx,ngllz) + (ngllx,ngllz) = (ngllx,ngllz)
