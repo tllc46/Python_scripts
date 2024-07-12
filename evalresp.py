@@ -63,7 +63,7 @@ for stage in response.response_stages:
                 stage.symmetry="odd symmetry"
         if not hasattr(stage,"symmetry"):
             stage.symmetry="asymmetry"
-    
+
     if type(stage)!=ResponseStage: #gain만 있는 단계 제외
         #gain 조정과 재정규화
         if stage.stage_gain_frequency!=f0:
