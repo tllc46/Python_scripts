@@ -47,7 +47,7 @@ def decode_data():
                     break_i=True
                     break
             elif nibble[j]==1:
-                difference+=list(unpack(format=">4b",buffer=file.read(4)))
+                difference+=list(unpack(">4b",file.read(4)))
             elif nibble[j]==2:
                 binary=int.from_bytes(bytes=file.read(4))
                 decode_nibble=binary>>30
@@ -108,49 +108,50 @@ blockette_type={0:"none",
 word_order=["little endian",
         "big endian"]
 
-with open(file="AU.WB9..BHZ",mode="rb") as file:
-    traces=[]
-    times=[]
-    #첫 번째 record
-    #header 전체 parse
-    header_word=file.read(20).decode(encoding="ascii")
-    header_num=unpack(format=">HHBBBBH HHHBBBBlHH",buffer=file.read(28))
-    zero_date=datetime.strptime(date_string=f"{header_num[0]} {header_num[1]} {header_num[2]} {header_num[3]} {header_num[4]} {header_num[6]*100:06}",format="%Y %j %H %M %S %f") #시작 날짜, 시간
-    npts=header_num[7] #npts
-    delta=1/header_num[8] #delta
+file=open(file="AU.WB9..BHZ",mode="rb")
+traces=[]
+times=[]
+#첫 번째 record
+#header 전체 parse
+header_word=file.read(20).decode(encoding="ascii")
+header_num=unpack(">HHBBBBH HHHBBBBlHH",file.read(28))
+zero_date=datetime.strptime(f"{header_num[0]} {header_num[1]} {header_num[2]} {header_num[3]} {header_num[4]} {header_num[6]*100:06}","%Y %j %H %M %S %f") #시작 날짜, 시간
+npts=header_num[7] #npts
+delta=1/header_num[8] #delta
 
-    b1000=unpack(format=">HHBBBB",buffer=file.read(8)) #1000번 blockette
-    frame_count=(1<<(b1000[4]-6))-1 #frame 개수
+b1000=unpack(">HHBBBB",file.read(8)) #1000번 blockette
+frame_count=(1<<(b1000[4]-6))-1 #frame 개수
 
-    file.seek(8,os.SEEK_CUR) #dummy bytes
+file.seek(8,os.SEEK_CUR) #dummy bytes
 
-    #data 복호
+#data 복호
+decode_data()
+time=np.arange(stop=npts)*delta
+traces.append(data)
+times.append(time)
+end_date=zero_date+timedelta(seconds=(npts-1)*delta)
+
+while file.read(1):
+    #일부 header 읽기
+    file.seek(19,os.SEEK_CUR)
+    sub_header=unpack(">HHBBBBH H",file.read(12)) #header 중에서 시작 날짜, 시간, npts만 parse
+    start_date=datetime.strptime(f"{sub_header[0]} {sub_header[1]} {sub_header[2]} {sub_header[3]} {sub_header[4]} {sub_header[6]*100:06}","%Y %j %H %M %S %f") #시작 날짜, 시간
+    npts=sub_header[7] #number of samples
+    file.seek(32,os.SEEK_CUR)
+
+    #decode data
     decode_data()
-    time=np.arange(stop=npts)*delta
-    traces.append(data)
-    times.append(time)
-    end_date=zero_date+timedelta(seconds=(npts-1)*delta)
-
-    while file.read(1):
-        #일부 header 읽기
-        file.seek(19,os.SEEK_CUR)
-        sub_header=unpack(format=">HHBBBBH H",buffer=file.read(12)) #header 중에서 시작 날짜, 시간, npts만 parse
-        start_date=datetime.strptime(date_string=f"{sub_header[0]} {sub_header[1]} {sub_header[2]} {sub_header[3]} {sub_header[4]} {sub_header[6]*100:06}",format="%Y %j %H %M %S %f") #시작 날짜, 시간
-        npts=sub_header[7] #number of samples
-        file.seek(32,os.SEEK_CUR)
-
-        #decode data
-        decode_data()
-        offset=(start_date-zero_date).total_seconds()
-        time=offset+np.arange(stop=npts)*delta
-        print(len(time),npts,delta)
-        if delta<(start_date-end_date).total_seconds(): #이전 record 사이 공백
-            traces.append(data)
-            times.append(time)
-        else: #이전 record와 연속
-            traces[-1]=np.concatenate((traces[-1],data))
-            times[-1]=np.concatenate((times[-1],time))
-        end_date=start_date+timedelta(seconds=(npts-1)*delta)
+    offset=(start_date-zero_date).total_seconds()
+    time=offset+np.arange(stop=npts)*delta
+    print(len(time),npts,delta)
+    if delta<(start_date-end_date).total_seconds(): #이전 record 사이 공백
+        traces.append(data)
+        times.append(time)
+    else: #이전 record와 연속
+        traces[-1]=np.concatenate((traces[-1],data))
+        times[-1]=np.concatenate((times[-1],time))
+    end_date=start_date+timedelta(seconds=(npts-1)*delta)
+file.close()
 
 #header 정보 출력
 print(f"sequence number={header_word[:6]}")
