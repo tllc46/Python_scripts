@@ -7,7 +7,7 @@ T=256
 dt=1
 N=int(T/dt)
 
-omega_analy=np.arange(stop=int(6*np.pi/0.01))*0.01-3*np.pi
+omega_analy=np.arange(stop=int(6*np.pi/0.01)+1)*0.01-3*np.pi
 omega_dft=np.arange(stop=3*N+1)*2*np.pi/N-3*np.pi
 
 analy=2*A*np.sin(0.5*tau*omega_analy)/omega_analy
