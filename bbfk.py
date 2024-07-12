@@ -36,7 +36,7 @@ def phaseshift(iptr,ncurrent):
             x2=x1
             x1=st[i].data[iptr+j]
 
-            output[i][j]=output1+1j*output2
+            output[i,j]=output1+1j*output2
 
         qstates[i]=[x1,x2,x3,y1,y2,w1,w2,p1,p2,q1,q2]
 
@@ -49,25 +49,25 @@ def covmat():
         phaseshift(iptr=iptr,ncurrent=ncurrent)
         for i in range(nch):
             for j in range(nch):
-                x=output[i][1:ncurrent:decrate] #1/2 desample
-                y=output[j][1:ncurrent:decrate]
+                x=output[i,1:ncurrent:decrate] #1/2 desample
+                y=output[j,1:ncurrent:decrate]
                 c=x*np.conjugate(y)
-                scm[j][i]+=sum(c)
+                scm[j,i]+=sum(c)
 
 def normalize():
     trace=np.real(val=np.trace(scm))
     for i in range(nch):
-        v=np.real(scm[i][i])
+        v=np.real(scm[i,i])
         scale=np.sqrt(trace/(v*nch))
         for j in range(nch):
-            scm[i][j]*=scale
-            scm[j][i]*=scale
+            scm[i,j]*=scale
+            scm[j,i]*=scale
 
 def regularize():
     trace=np.real(val=np.trace(scm))
     offset=trace*eps/nch
     for i in range(nch):
-        scm[i][i]+=offset
+        scm[i,i]+=offset
 
 def mlm():
     #fks/xbbfk.c/eigenanal()
@@ -89,7 +89,7 @@ def fkevalr():
     for i in range(ssq):
         for j in range(ssq):
             tmp=np.matmul(np.exp(-1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1])),scm)
-            fks[i][j]=np.real(val=np.matmul(tmp,np.exp(1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1]))))
+            fks[i,j]=np.real(val=np.matmul(tmp,np.exp(1j*(wv[i]*geometry[:,0]+wv[j]*geometry[:,1]))))
 
 #main
 st=read(pathname_or_url="sacdata/*",format="SAC",byteorder="little")
@@ -118,7 +118,7 @@ output=np.empty(shape=(nch,100),dtype=complex)
 scm=np.zeros(shape=(nch,nch),dtype=complex)
 fks=np.empty(shape=(ssq,ssq))
 qstates=np.zeros(shape=(nch,11))
-k=np.arange(stop=ssq)*2*wavenumber/(ssq-1)+wavenumber
+k=np.arange(stop=ssq)*2*wavenumber/(ssq-1)-wavenumber
 wv=2*np.pi*k
 
 covmat()
