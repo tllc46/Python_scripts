@@ -1,3 +1,5 @@
+#sac-102.0/src/fks/xbbfk.c 참고
+
 from obspy import read
 from obspy.core import AttribDict
 from obspy.signal.array_analysis import get_geometry
