@@ -67,8 +67,8 @@ n_day=int((end_date-start_date)/sec_1d)+1
 n_seg_1d=int(sec_1d/step)
 n_seg=n_day*n_seg_1d
 
-file="/home/tllc46/anaconda3/envs/seis/lib/python3.11/site-packages/obspy/signal/data/noise_models.npz"
-NpzFile=np.load(file=file)
+model_file="/home/tllc46/anaconda3/envs/seis/lib/python3.11/site-packages/obspy/signal/data/noise_models.npz"
+NpzFile=np.load(file=model_file)
 model_frequencies=1/NpzFile["model_periods"]
 nhnm=NpzFile["high_noise"]
 nlnm=NpzFile["low_noise"]
