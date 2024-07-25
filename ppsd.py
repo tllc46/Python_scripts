@@ -1,3 +1,5 @@
+#obspy/signal/spectral_estimation.py 참고
+
 import sys
 
 import numpy as np
