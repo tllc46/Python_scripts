@@ -1,5 +1,5 @@
 # python_scripts
-Fourier_Trans: 박창업 교수님 Fourier 변환 문제 해답
+FFT: 박창업 교수님 Fourier 변환 문제 해답
 
 PyGMT: PyGMT 문제 해답
 
