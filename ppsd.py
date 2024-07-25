@@ -5,18 +5,17 @@ import numpy.ma as ma
 from scipy.signal import ShortTimeFFT
 import matplotlib.pyplot as plt
 
-from obspy import UTCDateTime
 from obspy.signal.util import prev_pow_2
 from obspy.signal.spectral_estimation import fft_taper
 
 dtiny=np.finfo(dtype=float).tiny
 
-#__init__()
-#{
 sampling_rate=200
 db_bins=(-200,-50,1)
 ppsd_length=3600
 overlap=0.5
+period_smoothing_width_octaves=1
+period_step_octaves=0.125
 
 #13 segments overlapping by 75%
 #1 segment + 25% * 12 segments
@@ -29,43 +28,23 @@ seg_len=int(sampling_rate*ppsd_length)
 SFT=ShortTimeFFT(win=fft_taper(data=np.ones(shape=nfft)),hop=nfft-nlap,fs=sampling_rate,scale_to="psd",phase_shift=None)
 _,p_lb=SFT.lower_border_end
 _,p_ub=SFT.upper_border_begin(n=seg_len)
-freq=SFT.f
-psd_frequencies=freq[1:]
 frequency_lim=(sampling_rate/nfft,0.5*sampling_rate)
 
-#setup_period_binning()
-#{
-period_smoothing_width_octaves=1
-period_step_octaves=0.125
 num_frequency_bins=int((np.log2(nfft)-1)/period_step_octaves)+1
 center_exp=np.arange(stop=num_frequency_bins)*period_step_octaves
-left_exp=center_exp-0.5*period_smoothing_width_octaves
-right_exp=center_exp+0.5*period_smoothing_width_octaves
-xedge_exp=center_exp+0.5*period_step_octaves
-xedge_exp=np.insert(arr=xedge_exp,obj=0,values=-0.5*period_step_octaves)
-frequency_bin_centers=sampling_rate/nfft*np.power(2,center_exp)
-frequency_bin_left_edges=sampling_rate/nfft*np.power(2,left_exp)
-frequency_bin_right_edges=sampling_rate/nfft*np.power(2,right_exp)
-frequency_xedges=sampling_rate/nfft*np.power(2,xedge_exp)
-#}
+edge_exp=center_exp+0.5*period_step_octaves
+edge_exp=np.insert(arr=edge_exp,obj=0,values=-0.5*period_step_octaves)
+frequency_bin_edges=frequency_lim[0]*np.power(2,edge_exp)
 
 num_db_bins=int((db_bins[1]-db_bins[0])/db_bins[2])
 db_bin_edges=np.linspace(start=db_bins[0],stop=db_bins[1],num=num_db_bins+1)
 
-delta=1/sampling_rate
 step=ppsd_length*(1-overlap)
-db_bin_centers=0.5*(db_bin_edges[:-1]+db_bin_edges[1:])
-#}
 
 stnm=sys.argv[1]
 
-sec_1d=86400
-start_date=UTCDateTime("2014-06-01")
-end_date=UTCDateTime("2014-06-30")
-start_1d=start_date
-n_day=int((end_date-start_date)/sec_1d)+1
-n_seg_1d=int(sec_1d/step)
-n_seg=n_day*n_seg_1d
+start_date="2013-10-01"
+end_date="2015-10-31"
 
 model_file="/home/tllc46/anaconda3/envs/seis/lib/python3.11/site-packages/obspy/signal/data/noise_models.npz"
 NpzFile=np.load(file=model_file)
@@ -73,30 +52,38 @@ model_frequencies=1/NpzFile["model_periods"]
 nhnm=NpzFile["high_noise"]
 nlnm=NpzFile["low_noise"]
 
-def add():
+def calculate_psd():
     from sys import stderr
     from glob import glob
 
-    from obspy import read
+    from obspy import read,UTCDateTime
     from obspy.signal.invsim import evalresp
 
+    sec_1d=86400
+    udt_start_date=UTCDateTime(start_date)
+    udt_end_date=UTCDateTime(end_date)
+    start_1d=udt_start_date
+    n_day=int((udt_end_date-udt_start_date)/sec_1d)+1
+    n_seg_1d=int(sec_1d/step)
+    n_seg=n_day*n_seg_1d
+
+    left_exp=center_exp-0.5*period_smoothing_width_octaves
+    right_exp=center_exp+0.5*period_smoothing_width_octaves
     psd_frequency_order=np.arange(start=1,stop=int(nfft/2)+1)
     psd_frequency_log2=np.log2(psd_frequency_order)
     left_idx=np.searchsorted(a=psd_frequency_log2,v=left_exp)
     right_idx=np.searchsorted(a=psd_frequency_log2,v=right_exp,side="right")
 
+    delta=1/sampling_rate
     scaling_factor=2
 
-    #get_response()
-    #    get_response_from_resp()
-    #{
     filename=f"/media/tllc46/data01/Jeju/BB_RESP/RESP.05.{stnm}..HHZ"
     resp=evalresp(t_samp=delta,nfft=nfft,filename=filename,date=UTCDateTime("2014-06-01"),units="ACC")
     resp=resp[1:]
     respamp=abs(resp*np.conj(resp))
-    #}
 
-    file=open(file=f"ppsd_results/{stnm}",mode="w")
+    seg_idx=0
+    psd_values=np.empty(shape=(n_seg,num_frequency_bins))
 
     def read_stream(date):
         pathname=f"/home/tllc46/48NAS2/symbolic.jeju/05.{stnm}/HHZ/05.{stnm}.HHZ.{date.year}.{date.julday:03}*"
@@ -114,8 +101,7 @@ def add():
             return None
 
     def next_day():
-        global start_1d
-        nonlocal st1
+        nonlocal st1,start_1d
         print(start_1d.strftime(format="%Y-%m-%d"),"| ending...",file=stderr)
         print("-------------------------------",file=stderr)
         st1=st2
@@ -128,7 +114,8 @@ def add():
         st2=read_stream(date=start_1d+sec_1d)
         if not st1:
             print(start_1d.strftime(format="%Y-%m-%d"),"| no data",file=stderr)
-            file.write((str(-999999)+"\n")*num_frequency_bins*n_seg_1d)
+            psd_values[seg_idx:seg_idx+n_seg_1d,:]=999999
+            seg_idx+=n_seg_1d
             next_day()
             continue
 
@@ -144,45 +131,41 @@ def add():
 
             if not st_seg:
                 print(start_1d.strftime(format="%Y-%m-%d"),f"| {j+1:02}/{n_seg_1d} segment | no data",file=stderr)
-                file.write((str(-999999)+"\n")*num_frequency_bins)
+                psd_values[seg_idx,:]=999999
+                seg_idx+=1
                 continue
 
             tr=st_seg[0]
 
             if len(tr.data)<seg_len or type(tr.data)==ma.MaskedArray and tr.data.count()<seg_len:
                 print(start_1d.strftime(format="%Y-%m-%d"),f"| {j+1:02}/{n_seg_1d} segment | gap exists",file=stderr)
-                file.write((str(-999999)+"\n")*num_frequency_bins)
+                psd_values[seg_idx,:]=999999
+                seg_idx+=1
                 continue
 
-            #process()
-            #{
-            result=SFT.stft_detrend(x=tr.data,detr="linear",p0=p_lb,p1=p_ub)
+            result=SFT.stft_detrend(x=tr.data,detr="linear",p0=p_lb,p1=p_ub)[1:]
             result=np.conj(result)*result
-            result[1:-1]*=scaling_factor
-            spec=result.mean(axis=1).real
-            spec=spec[1:]
+            result[:-1]*=scaling_factor
+            spec=np.mean(a=result,axis=1).real
             spec/=respamp
             spec[spec<dtiny]=dtiny
             spec=10*np.log10(spec)
             for i in range(num_frequency_bins):
-                psd_value=np.mean(a=spec[left_idx[i]:right_idx[i]])
-                file.write(str(psd_value)+"\n")
-            #}
+                psd_values[seg_idx,i]=np.mean(a=spec[left_idx[i]:right_idx[i]])
+            seg_idx+=1
 
         next_day()
 
-    file.close()
+    np.save(file=f"ppsd_results/{stnm}.npy",arr=psd_values)
 
-def plot():
+def plot_histogram():
     from obspy.imaging.cm import pqlx
 
     max_percentage=30
     cmap=pqlx
 
-    #calculate_histogram()
-    #{
-    psd_values=np.loadtxt(fname=f"ppsd_results/{stnm}").reshape(n_seg,num_frequency_bins)
-    psd_values=ma.masked_equal(x=psd_values,value=-999999)
+    psd_values=np.load(file=f"ppsd_results/{stnm}.npy")
+    psd_values=ma.masked_equal(x=psd_values,value=999999)
     psd_values=ma.compress_rows(a=psd_values)
 
     current_histogram_count=len(psd_values)
@@ -194,11 +177,8 @@ def plot():
 
     for i in range(num_frequency_bins):
         current_histogram[:,i]=np.histogram(a=psd_values[:,i],bins=db_bin_edges)[0]*100/current_histogram_count
-    #}
 
-    #plot_histogram()
-    #{
-    meshgrid=np.meshgrid(frequency_xedges,db_bin_edges)
+    meshgrid=np.meshgrid(frequency_bin_edges,db_bin_edges)
 
     fig=plt.figure(figsize=(25.6,12.67))
     ax=fig.subplots()
@@ -218,13 +198,14 @@ def plot():
     ax.xaxis.set_major_formatter(formatter="{x:g}")
     ax.set_title(label=stnm)
     fig.savefig(fname=f"ppsd_plots/{stnm}.png")
-    #}
 
-def plot_stats():
+def plot_statistics():
     percentiles=[0,25,50,75,100]
+    frequency_bin_centers=frequency_lim[0]*np.power(2,center_exp)
+    db_bin_centers=0.5*(db_bin_edges[:-1]+db_bin_edges[1:])
 
-    psd_values=np.loadtxt(fname=f"ppsd_results/{stnm}").reshape(n_seg,num_frequency_bins)
-    psd_values=ma.masked_equal(x=psd_values,value=-999999)
+    psd_values=np.load(file=f"ppsd_results/{stnm}.npy")
+    psd_values=ma.masked_equal(x=psd_values,value=999999)
     psd_values=ma.compress_rows(a=psd_values)
 
     current_histogram=np.empty(shape=(num_db_bins,num_frequency_bins),dtype=int)
@@ -238,8 +219,9 @@ def plot_stats():
 
     fig=plt.figure(figsize=(25.6,12.67))
     ax=fig.subplots()
-    for i in range(len(percentiles)):
-        line1=ax.plot(frequency_bin_centers,percentile_values[i],color="green")[0]
+    for i in range(len(percentiles)-1):
+        ax.plot(frequency_bin_centers,percentile_values[i],color="green")
+    line1=ax.plot(frequency_bin_centers,percentile_values[i+1],color="green")[0]
     line2=ax.plot(frequency_bin_centers,mode,color="blue")[0]
     line3=ax.plot(frequency_bin_centers,mean,color="red")[0]
     ax.plot(model_frequencies,nhnm,color="0.4",linewidth=2)
@@ -256,14 +238,14 @@ def plot_stats():
     fig.savefig(fname=f"ppsd_plots/{stnm}.png")
 
 def plot_spectrogram():
-    start_date=np.datetime64("2013-10-01")
-    end_date=np.datetime64("2015-10-31")
+    np_start_date=np.datetime64(start_date)
+    np_end_date=np.datetime64(end_date)
     np_step=np.timedelta64(int(step),"s")
-    xedges=np.arange(start=start_date,stop=end_date+np.timedelta64(1,"D")+np_step,step=np_step)
-    meshgrid_x,meshgrid_y=np.meshgrid(xedges,frequency_xedges)
+    xedges=np.arange(start=np_start_date,stop=np_end_date+np.timedelta64(1,"D")+np_step,step=np_step)
+    meshgrid_x,meshgrid_y=np.meshgrid(xedges,frequency_bin_edges)
 
-    psd_values=np.loadtxt(fname=f"ppsd_results/{stnm}").reshape(n_seg,num_frequency_bins)
-    psd_values=ma.masked_equal(x=psd_values,value=-999999)
+    psd_values=np.load(file=f"ppsd_results/{stnm}.npy")
+    psd_values=ma.masked_equal(x=psd_values,value=999999)
     psd_values=psd_values.T
 
     fig=plt.figure(figsize=(25.6,12.67))
@@ -278,4 +260,4 @@ def plot_spectrogram():
     fig.savefig(fname=f"ppsd_plots/{stnm}.png")
 
 #main
-add()
+calculate_psd()
