@@ -1,5 +1,3 @@
-#obspy/signal/spectral_estimation.py 참고
-
 import sys
 
 import numpy as np
@@ -7,6 +5,7 @@ import numpy.ma as ma
 from scipy.signal import ShortTimeFFT
 import matplotlib.pyplot as plt
 
+from obspy import UTCDateTime
 from obspy.signal.util import prev_pow_2
 from obspy.signal.spectral_estimation import fft_taper
 
@@ -45,8 +44,14 @@ step=ppsd_length*(1-overlap)
 
 stnm=sys.argv[1]
 
-start_date="2013-10-01"
-end_date="2015-10-31"
+sec_1d=86400
+start_date="2021-07-01"
+end_date="2023-06-30"
+udt_start_date=UTCDateTime(start_date)
+udt_end_date=UTCDateTime(end_date)
+n_day=int((udt_end_date-udt_start_date)/sec_1d)+1
+n_seg_1d=int(sec_1d/step)
+n_seg=n_day*n_seg_1d
 
 model_file="/home/tllc46/anaconda3/envs/seis/lib/python3.11/site-packages/obspy/signal/data/noise_models.npz"
 NpzFile=np.load(file=model_file)
@@ -58,16 +63,10 @@ def calculate_psd():
     from sys import stderr
     from glob import glob
 
-    from obspy import read,UTCDateTime
+    from obspy import read
     from obspy.signal.invsim import evalresp
 
-    sec_1d=86400
-    udt_start_date=UTCDateTime(start_date)
-    udt_end_date=UTCDateTime(end_date)
     start_1d=udt_start_date
-    n_day=int((udt_end_date-udt_start_date)/sec_1d)+1
-    n_seg_1d=int(sec_1d/step)
-    n_seg=n_day*n_seg_1d
 
     left_exp=center_exp-0.5*period_smoothing_width_octaves
     right_exp=center_exp+0.5*period_smoothing_width_octaves
@@ -79,7 +78,7 @@ def calculate_psd():
     delta=1/sampling_rate
     scaling_factor=2
 
-    filename=f"/media/tllc46/data01/Jeju/BB_RESP/RESP.05.{stnm}..HHZ"
+    filename=f"/home/tllc46/48NAS1/tllc46/UL/RESP/UL.{stnm}..HHZ.resp"
     resp=evalresp(t_samp=delta,nfft=nfft,filename=filename,date=UTCDateTime("2014-06-01"),units="ACC")
     resp=resp[1:]
     respamp=abs(resp*np.conj(resp))
@@ -88,15 +87,9 @@ def calculate_psd():
     psd_values=np.empty(shape=(n_seg,num_frequency_bins))
 
     def read_stream(date):
-        pathname=f"/home/tllc46/48NAS2/symbolic.jeju/05.{stnm}/HHZ/05.{stnm}.HHZ.{date.year}.{date.julday:03}*"
+        pathname=f"/home/tllc46/48NAS2/UL/UL240104/UL.{stnm}/HHZ/UL.{stnm}.HHZ.UL.HHZ.{date.year}.{date.julday:03}*"
         if glob(pathname=pathname):
             st=read(pathname_or_url=pathname,format="MSEED")
-            l=0
-            while l<len(st):
-                if st[l].stats.sampling_rate!=200:
-                    st.pop(index=l)
-                    continue
-                l+=1
             st.merge(method=1)
             return st
         else:
@@ -158,7 +151,7 @@ def calculate_psd():
 
         next_day()
 
-    np.save(file=f"ppsd_results/{stnm}.npy",arr=psd_values)
+    np.save(file=f"/home/tllc46/48NAS1/tllc46/UL/PPSD/{stnm}.npy",arr=psd_values)
 
 def plot_histogram():
     from obspy.imaging.cm import pqlx
@@ -166,7 +159,7 @@ def plot_histogram():
     max_percentage=30
     cmap=pqlx
 
-    psd_values=np.load(file=f"ppsd_results/{stnm}.npy")
+    psd_values=np.load(file=f"/home/tllc46/48NAS1/tllc46/UL/PPSD/{stnm}.npy")
     psd_values=ma.masked_equal(x=psd_values,value=999999)
     psd_values=ma.compress_rows(a=psd_values)
 
@@ -198,7 +191,7 @@ def plot_histogram():
     ax.set_ylim(bottom=db_bins[0],top=db_bins[1])
     ax.set_ylabel(ylabel="Amplitude [$(m/s^2)^2/Hz$] [dB]")
     ax.xaxis.set_major_formatter(formatter="{x:g}")
-    ax.set_title(label=stnm)
+    ax.set_title(label=f"{stnm} {start_date} -- {end_date} ({len(psd_values)}/{n_seg} segments)")
     fig.savefig(fname=f"ppsd_plots/{stnm}.png")
 
 def plot_statistics():
@@ -206,7 +199,7 @@ def plot_statistics():
     frequency_bin_centers=frequency_lim[0]*np.power(2,center_exp)
     db_bin_centers=0.5*(db_bin_edges[:-1]+db_bin_edges[1:])
 
-    psd_values=np.load(file=f"ppsd_results/{stnm}.npy")
+    psd_values=np.load(file=f"/home/tllc46/48NAS1/tllc46/UL/PPSD/{stnm}.npy")
     psd_values=ma.masked_equal(x=psd_values,value=999999)
     psd_values=ma.compress_rows(a=psd_values)
 
@@ -236,7 +229,7 @@ def plot_statistics():
     ax.set_ylim(bottom=db_bins[0],top=db_bins[1])
     ax.set_ylabel(ylabel="Amplitude [$(m/s^2)^2/Hz$] [dB]")
     ax.xaxis.set_major_formatter(formatter="{x:g}")
-    ax.set_title(label=stnm)
+    ax.set_title(label=f"{stnm} {start_date} -- {end_date} ({len(psd_values)}/{n_seg} segments)")
     fig.savefig(fname=f"ppsd_plots/{stnm}.png")
 
 def plot_spectrogram():
@@ -246,7 +239,7 @@ def plot_spectrogram():
     xedges=np.arange(start=np_start_date,stop=np_end_date+np.timedelta64(1,"D")+np_step,step=np_step)
     meshgrid_x,meshgrid_y=np.meshgrid(xedges,frequency_bin_edges)
 
-    psd_values=np.load(file=f"ppsd_results/{stnm}.npy")
+    psd_values=np.load(file=f"/home/tllc46/48NAS1/tllc46/UL/PPSD/{stnm}.npy")
     psd_values=ma.masked_equal(x=psd_values,value=999999)
     psd_values=psd_values.T
 
@@ -259,6 +252,7 @@ def plot_spectrogram():
     ax.set_yscale(value="log")
     ax.set_xlim(left=xedges[0],right=xedges[-1])
     ax.set_ylim(bottom=frequency_lim[0],top=frequency_lim[1])
+    ax.set_title(label=f"{stnm} {start_date} -- {end_date} ({len(psd_values)}/{n_seg} segments)")
     fig.savefig(fname=f"ppsd_plots/{stnm}.png")
 
 #main
