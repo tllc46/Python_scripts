@@ -59,10 +59,10 @@ def naver_map():
 
     #네이버 지도
     driver.get(url="https://map.naver.com/p")
-    for i in range(len(df)):
-        latitude=df.loc[i,"lat"]
-        longitude=df.loc[i,"lon"]
-        station_name=df.loc[i,"name"]
+    for index,data in df.iterrows():
+        latitude=data["lat"]
+        longitude=data["lon"]
+        station_name=data["name"]
         #"장소, 버스, 지하철, 도로 검색"
         elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div/div[1]/div/div/div/input")
         elem.send_keys(f"{latitude} {longitude}")
