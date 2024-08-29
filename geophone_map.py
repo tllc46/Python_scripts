@@ -42,18 +42,18 @@ def naver_map():
     #새 리스트
     driver.get(url="https://pages.map.naver.com/save-pages/pc/all-list")
     #"새 리스트 만들기" 버튼
-    elem=driver.find_element(by=By.XPATH,value='//*[@id="app"]/div/div/div[2]/button')
+    elem=driver.find_element(by=By.XPATH,value="/html/body/div/div/div/div[2]/button")
     elem.click()
     time.sleep(2)
     #"새 리스트명을 입력해주세요"
-    elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-input-folderview-list"]')
+    elem=driver.find_element(by=By.XPATH,value="/html/body/div[2]/div/div[2]/div[2]/div[1]/div/div/input")
     elem.send_keys(list_name)
     #색상 선택 버튼
     color_id=10
-    elem=driver.find_element(by=By.XPATH,value=f'//*[@id="swt-save-widget-wrap"]/div[2]/div[2]/div[2]/div/button[{color_id}]')
+    elem=driver.find_element(by=By.XPATH,value=f"/html/body/div[2]/div/div[2]/div[2]/div[2]/div/button[{color_id}]")
     elem.click()
     #"완료" 버튼
-    elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-widget-wrap"]/div[2]/div[3]/button')
+    elem=driver.find_element(by=By.XPATH,value="/html/body/div[2]/div/div[2]/div[3]/button")
     elem.click()
     time.sleep(2)
 
@@ -64,13 +64,13 @@ def naver_map():
         longitude=df.loc[i,"lon"]
         station_name=df.loc[i,"name"]
         #"장소, 버스, 지하철, 도로 검색"
-        elem=driver.find_element(by=By.CLASS_NAME,value="input_search")
+        elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div/div[1]/div/div/div/input")
         elem.send_keys(f"{latitude} {longitude}")
         elem.send_keys(Keys.RETURN)
         time.sleep(2)
         #"저장 추가" 버튼
         try:
-            elem=driver.find_element(by=By.XPATH,value='//*[@id="section_content"]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button')
+            elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div/div[2]/div[1]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button")
         except:
             print(station_name,"| address doesn't exist, skip without saving")
             continue
@@ -78,16 +78,16 @@ def naver_map():
             elem.click()
             time.sleep(2)
         #"메모, 별명, URL 추가" 버튼
-        elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-widget-wrap"]/div[2]/div[2]/div/button')
+        elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/div/button")
         elem.click()
         #"지도 위에 표시될 별명을 남겨주세요"
-        elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-input-listview-nickname"]')
+        elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/div/ul/li[2]/div/div/input")
         elem.send_keys(station_name)
         #리스트 선택
-        elem=driver.find_element(by=By.XPATH,value=f'//*[@id="swt-save-widget-wrap"]/div[2]/div[2]/ul/li[button/strong/text()="{list_name}"]/button')
+        elem=driver.find_element(by=By.XPATH,value=f'/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/ul/li[button/strong/text()="{list_name}"]/button')
         elem.click()
         #"저장" 버튼
-        elem=driver.find_element(by=By.XPATH,value='//*[@id="swt-save-widget-wrap"]/div[2]/div[3]/button')
+        elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[3]/button")
         elem.click()
         print(station_name,"| done saving")
         time.sleep(2)
