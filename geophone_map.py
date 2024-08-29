@@ -22,18 +22,19 @@ def parse_kml():
     csv_file.close()
 
 def naver_map():
-    import time
-
     import pandas as pd
     from selenium import webdriver
     from selenium.webdriver.common.by import By
     from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.support.wait import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
 
-    list_name="원주 출장"
+    list_name="강릉 출장"
 
-    df=pd.read_csv(filepath_or_buffer="/home/tllc46/Downloads/Weonju.txt",sep=" ",names=["lat","lon","name"])
+    df=pd.read_csv(filepath_or_buffer="foo4.txt",sep=" ",names=["lat","lon","name","team"])
 
     driver=webdriver.Chrome()
+    wait=WebDriverWait(driver=driver,timeout=10)
 
     #네이버 로그인
     driver.get(url="https://nid.naver.com/nidlogin.login")
@@ -44,18 +45,17 @@ def naver_map():
     #"새 리스트 만들기" 버튼
     elem=driver.find_element(by=By.XPATH,value="/html/body/div/div/div/div[2]/button")
     elem.click()
-    time.sleep(2)
     #"새 리스트명을 입력해주세요"
-    elem=driver.find_element(by=By.XPATH,value="/html/body/div[2]/div/div[2]/div[2]/div[1]/div/div/input")
+    elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[2]/div/div[2]/div[2]/div[1]/div/div/input")))
     elem.send_keys(list_name)
     #색상 선택 버튼
-    color_id=10
+    color_id=12
     elem=driver.find_element(by=By.XPATH,value=f"/html/body/div[2]/div/div[2]/div[2]/div[2]/div/button[{color_id}]")
     elem.click()
     #"완료" 버튼
-    elem=driver.find_element(by=By.XPATH,value="/html/body/div[2]/div/div[2]/div[3]/button")
+    elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[2]/div/div[2]/div[3]/button")))
     elem.click()
-    time.sleep(2)
+    wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,f'/html/body/div/div/div/ul/li[button/div[2]/div[1]/span/text()="{list_name}"]')))
 
     #네이버 지도
     driver.get(url="https://map.naver.com/p")
@@ -65,23 +65,22 @@ def naver_map():
         station_name=data["name"]
         #"장소, 버스, 지하철, 도로 검색"
         elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div/div[1]/div/div/div/input")
+        #elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[1]/div/div[2]/div[1]/div/div[1]/div/div/div/input")))
         elem.send_keys(f"{latitude} {longitude}")
         elem.send_keys(Keys.RETURN)
-        time.sleep(2)
         #"저장 추가" 버튼
         try:
-            elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div/div[2]/div[1]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button")
+            elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[1]/div/div[2]/div[1]/div/div[2]/div[1]/div/div/div/div/div[1]/div[2]/div[2]/div[1]/button")))
         except:
             print(station_name,"| address doesn't exist, skip without saving")
             continue
         else:
             elem.click()
-            time.sleep(2)
         #"메모, 별명, URL 추가" 버튼
-        elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/div/button")
+        elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/div/button")))
         elem.click()
         #"지도 위에 표시될 별명을 남겨주세요"
-        elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/div/ul/li[2]/div/div/input")
+        elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/div/ul/li[2]/div/div/input")))
         elem.send_keys(station_name)
         #리스트 선택
         elem=driver.find_element(by=By.XPATH,value=f'/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/ul/li[button/strong/text()="{list_name}"]/button')
@@ -89,8 +88,8 @@ def naver_map():
         #"저장" 버튼
         elem=driver.find_element(by=By.XPATH,value="/html/body/div[1]/div/div[2]/div[1]/div[2]/div/div/div[2]/div[3]/button")
         elem.click()
+        wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[1]/div/div[2]/div[1]/div/div[2]/div[1]/div/div/div/div/div[1]/div[1]/div[2]/div[2]/div/button")))
         print(station_name,"| done saving")
-        time.sleep(2)
 
     driver.close()
 
