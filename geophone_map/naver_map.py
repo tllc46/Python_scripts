@@ -6,6 +6,7 @@ color_map={"green":5,"blue":10,"yellow":3,"pink":7}
 ###############################
 
 import time
+
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
