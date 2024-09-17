@@ -137,7 +137,7 @@ else:
 ix,iy=np.unravel_index(indices=fks.argmax(),shape=fks.shape)
 
 #10. plot
-plt.figure()
+fig=plt.figure()
 ax=fig.subplots()
 ax.pcolormesh(sl_x,sl_y,fks,cmap="Reds")
 ax.scatter(x=sl_x[ix,iy],y=sl_y[ix,iy],s=200,c="green",marker="+")
