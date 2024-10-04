@@ -7,7 +7,7 @@ color_map={"green":4,"blue":6,"yellow":2,"pink":7}
 group_name="Gangneung geophone"
 ###############################
 
-import time
+from time import sleep
 
 import pandas as pd
 from selenium import webdriver
@@ -42,7 +42,7 @@ elem.send_keys(group_name)
 #"완료" 버튼
 elem=driver.find_element(by=By.XPATH,value="/html/body/div[20]/div[4]/form/fieldset/div[3]/button")
 elem.click()
-time.sleep(1)
+sleep(1)
 #"그룹이 생성되었습니다."
 driver.switch_to.alert.accept()
 
