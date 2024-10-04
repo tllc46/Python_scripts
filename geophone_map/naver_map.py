@@ -5,7 +5,7 @@ input_file="Gangneung.txt"
 color_map={"green":5,"blue":10,"yellow":3,"pink":7}
 ###############################
 
-import time
+from time import sleep
 
 import pandas as pd
 from selenium import webdriver
