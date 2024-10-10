@@ -57,9 +57,9 @@ for key,value in symbol_map.items():
 for index,data in df.iterrows():
     latitude=data["lat"]
     longitude=data["lon"]
-    text=data["text"]
     fill_idx=fill_map[data["fill"]]
     symbol=data["symbol"]
+    text=data["text"]
     #"장소, 주소, 버스 검색"
     elem=driver.find_element(by=By.XPATH,value="/html/body/div[2]/div/div/form/fieldset/div[1]/input")
     elem.clear()
