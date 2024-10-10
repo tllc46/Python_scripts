@@ -1,8 +1,8 @@
 #####   input arguments   #####
 #####    1. input file    #####
 input_file="Gangneung.txt"
-#####  2. color index map #####
-color_map={"green":4,"blue":6,"yellow":2,"pink":7}
+#####  2. fill index map  #####
+fill_map={"green":4,"blue":6,"yellow":2,"pink":7}
 ##### 3. symbol index map #####
 symbol_map={"O":1,"X":8}
 ###############################
@@ -16,7 +16,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-df=pd.read_csv(filepath_or_buffer=input_file,sep=" ",names=["lat","lon","station","color","symbol"])
+df=pd.read_csv(filepath_or_buffer=input_file,sep=" ",names=["lat","lon","fill","symbol","text"])
 
 driver=webdriver.Chrome()
 wait=WebDriverWait(driver=driver,timeout=10)
@@ -57,9 +57,9 @@ for key,value in symbol_map.items():
 for index,data in df.iterrows():
     latitude=data["lat"]
     longitude=data["lon"]
-    station_name=data["station"]
-    color_idx=color_map[data["color"]]
-    symbol_name=data["symbol"]
+    text=data["text"]
+    fill_idx=fill_map[data["fill"]]
+    symbol=data["symbol"]
     #"장소, 주소, 버스 검색"
     elem=driver.find_element(by=By.XPATH,value="/html/body/div[2]/div/div/form/fieldset/div[1]/input")
     elem.clear()
@@ -68,15 +68,15 @@ for index,data in df.iterrows():
     elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[7]/div[6]/div[7]/div[2]/div/div[6]/div/div/div[2]/div[3]/div/div[1]/a[1]")))
     elem.click()
     #그룹 선택
-    elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,f'/html/body/div[20]/div[2]/div[2]/ul/li[a/span[2]/strong/text()="{symbol_name}"]/a')))
+    elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,f'/html/body/div[20]/div[2]/div[2]/ul/li[a/span[2]/strong/text()="{symbol}"]/a')))
     elem.click()
     #별명 입력
     elem=driver.find_element(by=By.XPATH,value="/html/body/div[20]/div[3]/form/fieldset/div[2]/div[1]/input")
     elem.click()
     elem.clear()
-    elem.send_keys(station_name)
+    elem.send_keys(text)
     #색상 선택 버튼
-    elem=driver.find_element(by=By.XPATH,value=f"/html/body/div[20]/div[3]/form/fieldset/div[2]/ul/li[{color_idx}]/input")
+    elem=driver.find_element(by=By.XPATH,value=f"/html/body/div[20]/div[3]/form/fieldset/div[2]/ul/li[{fill_idx}]/input")
     elem.click()
     #"완료" 버튼
     elem=driver.find_element(by=By.XPATH,value="/html/body/div[20]/div[3]/form/fieldset/div[3]/button")
@@ -89,6 +89,6 @@ for index,data in df.iterrows():
     else:
         elem.click()
     #wait.until(method=EC.text_to_be_present_in_element_attribute(locator=(By.XPATH,"/html/body/div[7]/div[6]/div[7]/div[2]/div/div[6]/div[2]/div/div[2]/div[3]/div/div[1]/a[1]"),attribute_="class",text_="fav ACTIVE"))
-    print(station_name,"| done saving")
+    print(text,"| done saving")
 
 driver.close()
