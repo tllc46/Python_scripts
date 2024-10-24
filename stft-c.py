@@ -1,3 +1,5 @@
+#implementation of scipy.signal.stft() and scipy.signal.istft()
+
 import numpy as np
 
 from obspy import read
