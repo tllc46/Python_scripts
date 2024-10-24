@@ -21,11 +21,11 @@ def savgol_coeffs():
 
     x=np.arange(stop=window_length)-pos
     order=np.arange(stop=polyorder+1)[:,None]
-    A=x**order
+    A=x**order #(polyorder+1,window_length)
 
     y=np.zeros(shape=polyorder+1)
     y[0]=1
-    coeffs,_,_,_=lstsq(A, y)
+    coeffs,_,_,_=lstsq(a=A,b=y)
 
     return coeffs
 
@@ -38,11 +38,11 @@ for i in range(halflen,npts-halflen):
     y[i]=sum(data[start_idx:start_idx+window_length]*coeffs)
 
 #_fit_edge
-x=np.arange(window_length)[:,None]
-order=np.arange(polyorder+1)
+x=np.arange(stop=window_length)[:,None]
+order=np.arange(stop=polyorder+1)
 A=x**order #(window_length,polyorder+1)
 
-sol_mat=np.matmul(inv(np.matmul(A.T,A)),A.T) #(polyorder+1,window_length)
+sol_mat=np.matmul(inv(a=np.matmul(A.T,A)),A.T) #(polyorder+1,window_length)
 left=x[:halflen]
 right=x[-halflen:]
 
