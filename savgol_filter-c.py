@@ -1,4 +1,4 @@
-#implementation scipy.signal.savgol_filter()
+#implementation of scipy.signal.savgol_filter()
 
 import numpy as np
 from numpy.linalg import inv
