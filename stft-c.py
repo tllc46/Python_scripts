@@ -17,7 +17,7 @@ nadd=-len(data)%nstep
 pad_length=nperseg+len(data)+nadd
 x=np.zeros(shape=pad_length)
 x[nperseg//2:-nperseg//2-nadd]=data
-scale=1/(0.5*nperseg)
+scale=1/(0.5*nperseg) #integral of hann window
 nseg=(pad_length-nperseg)//nstep+1
 result=np.empty(shape=(nfft//2+1,nseg),dtype=complex)
 for i in range(nseg):
