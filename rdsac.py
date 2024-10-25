@@ -53,7 +53,7 @@ enum=[0,
         "dropouts", #data quality
         "low signal to noise ratio", #data quality
         "real data", #synthetic data flag
-        "velocity(V)", #dependent variable type
+        "voltage(V)", #dependent variable type
         "general xy vs. z", #file type
         "body wave magnitude", #magnitude type
         "surface wave magnitude", #magnitude type
