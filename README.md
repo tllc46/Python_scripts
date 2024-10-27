@@ -1,24 +1,38 @@
 # python_scripts
-FFT: 박창업 교수님 Fourier 변환 문제 해답
+FFT: solutions to professor Changeop Par's Fourier Transform problems
 
-PyGMT: PyGMT 문제 해답
+PyGMT: solutions to PyGMT problems
 
-SpecFEM2D-pseudo: SpecFEM2D 의사 Python code
+SpecFEM2D-pseudo: SpecFEM2D pseudo Python code (incomplete)
 
-FE_region.py: Flinn-Engdahl 지역 번호
+geophone_map: make Naver and Kakao maps automatically
+
+FE_region.py: Flinn-Engdahl regionalization
 
 bbfk.py: python version sac bbfk, translated sac-102.0/src/fks/xbbfk.c
 
-evalresp.py: python version evalresp-5.0.1을 Python으로 번역
+cov_mat.py: calculate covariance matrix
 
-fkan.py: fk 분석 종합
+evalresp.py: Python version evalresp-5.0.1
 
-geophone_naver.py: Naver 지도 즐겨찾기 macro
+fkan.py: frequency-wavenumber analysis
 
-noise_orientation.py: 이상준 교수님 배경 잡음 방위 보정 code를 Python으로 번역
+noise_orientation.py: Python version professor Sangjun Lee's seismometer orientation determination code
 
-rdmseed.py: MSEED file 읽기
+ppsd.py: translated obspy.signal.spectral_estimation.PPSD
 
-rdsac.py: SAC file 읽기
+rdmseed.py: read MSEED file
+
+rdsac.py: read SAC file
+
+savgol_filter-c.py: translated scipy.signal.savgol_filter()
+
+specfem1d.py: Python version 1D SpecFEM (homogeneous)
+
+specfem2d.py: Python version 2D SpecFEM (homogeneous)
+
+stft-c.py: translated scipy.signal.stft() and istft()
+
+tcas.py: translated astack/tcas.f
 
 vesp.py: vespagram
