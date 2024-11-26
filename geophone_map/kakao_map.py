@@ -27,7 +27,7 @@ driver.get(url="https://accounts.kakao.com/login/?continue=https%3A%2F%2Fmap.kak
 input("after login, press enter")
 
 #"지도 설정-교통저보, 지형도, 날씨 등 원하는 정보를 사용하세요."
-elem=driver.find_element(by=By.XPATH,value="/html/body/div[10]")
+elem=driver.find_element(by=By.XPATH,value="/html/body/div[9]")
 elem.click()
 
 #새 그룹
