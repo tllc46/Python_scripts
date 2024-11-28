@@ -19,7 +19,7 @@ def savgol_coeffs():
     else:
         pos=halflen-0.5
 
-    x=np.arange(stop=window_length)-pos
+    x=pos-np.arange(stop=window_length)
     order=np.arange(stop=polyorder+1)[:,None]
     A=x**order #(polyorder+1,window_length)
 
