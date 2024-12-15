@@ -40,31 +40,31 @@ def gen_kml():
 
     df=pd.read_csv(filepath_or_buffer=csv_file,sep=";",names=["lon","lat","elv","name","style","desc"])
 
-    kml=etree.Element("kml",nsmap=nsmap) #https://github.com/lxml/lxml/pull/136도 참고
-    document=etree.SubElement(kml,"Document")
-    etree.SubElement(document,"name").text="restored_map"
+    kml=etree.Element(_tag="kml",nsmap=nsmap) #https://github.com/lxml/lxml/pull/136도 참고
+    document=etree.SubElement(_parent=kml,_tag="Document")
+    etree.SubElement(_parent=document,_tag="name").text="restored_map"
 
     for i in style_map:
         color_text=style_map[i]
-        style=etree.SubElement(document,"Style",id=i)
-        iconstyle=etree.SubElement(style,"IconStyle")
-        etree.SubElement(iconstyle,"color").text=color_text
-        icon=etree.SubElement(iconstyle,"Icon")
-        etree.SubElement(icon,"href").text="https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png"
+        style=etree.SubElement(_parent=document,_tag="Style",id=i)
+        iconstyle=etree.SubElement(_parent=style,_tag="IconStyle")
+        etree.SubElement(_parent=iconstyle,_tag="color").text=color_text
+        icon=etree.SubElement(_parent=iconstyle,_tag="Icon")
+        etree.SubElement(_parent=icon,_tag="href").text="https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png"
 
     for i,row in df.iterrows():
-        placemark=etree.SubElement(document,"Placemark")
-        etree.SubElement(placemark,"name").text=row["name"]
-        etree.SubElement(placemark,"styleUrl").text=row["style"]
-        extendeddata=etree.SubElement(placemark,"ExtendedData")
-        data=etree.SubElement(extendeddata,"Data",name="위도")
-        etree.SubElement(data,"value").text=str(row["lat"])
-        data=etree.SubElement(extendeddata,"Data",name="경도")
-        etree.SubElement(data,"value").text=str(row["lon"])
-        data=etree.SubElement(extendeddata,"Data",name="설명")
-        etree.SubElement(data,"value").text=row["desc"]
-        point=etree.SubElement(placemark,"Point")
-        etree.SubElement(point,"coordinates").text=str(row["lon"])+","+str(row["lat"])+","+str(row["elv"])
+        placemark=etree.SubElement(_parent=document,_tag="Placemark")
+        etree.SubElement(_parent=placemark,_tag="name").text=row["name"]
+        etree.SubElement(_parent=placemark,_tag="styleUrl").text=row["style"]
+        extendeddata=etree.SubElement(_parent=placemark,_tag="ExtendedData")
+        data=etree.SubElement(_parent=extendeddata,_tag="Data",name="위도")
+        etree.SubElement(_parent=data,_tag="value").text=str(row["lat"])
+        data=etree.SubElement(_parent=extendeddata,_tag="Data",name="경도")
+        etree.SubElement(_parent=data,_tag="value").text=str(row["lon"])
+        data=etree.SubElement(_parent=extendeddata,_tag="Data",name="설명")
+        etree.SubElement(_parent=data,_tag="value").text=row["desc"]
+        point=etree.SubElement(_parent=placemark,_tag="Point")
+        etree.SubElement(_parent=point,_tag="coordinates").text=str(row["lon"])+","+str(row["lat"])+","+str(row["elv"])
 
     tree=etree.ElementTree(element=kml)
     tree.write(file=kml_file,encoding="UTF-8",pretty_print=True,xml_declaration=True)
