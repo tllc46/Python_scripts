@@ -40,7 +40,7 @@ def gen_kml():
 
     df=pd.read_csv(filepath_or_buffer=csv_file,sep=";",names=["lon","lat","elv","name","style","desc"])
 
-    kml=etree.Element("kml",nsmap=nsmap)
+    kml=etree.Element("kml",nsmap=nsmap) #https://github.com/lxml/lxml/pull/136도 참고
     document=etree.SubElement(kml,"Document")
     etree.SubElement(document,"name").text="restored_map"
 
