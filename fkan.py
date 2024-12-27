@@ -123,24 +123,23 @@ else:
 #8. beamforming
 sl_x=np.arange(stop=int((slm_x-sll_x)/sl_s))*sl_s+sll_x
 sl_y=np.arange(stop=int((slm_y-sll_y)/sl_s))*sl_s+sll_y
-sl_x,sl_y=np.meshgrid(sl_x,sl_y)
 if ssm=="coherent":
-    fks=np_fk_cssm(sl_x=sl_x,sl_y=sl_y)
+    fks=np_fk_cssm(sl_x=sl_x,sl_y=sl_y[:,None])
     fks=np.array(object=fks,dtype=float)
     if method=="Capon" or method=="MUSIC":
         fks=1/fks
 else:
-    fks=np_fk_issm(sl_x=sl_x,sl_y=sl_y)
+    fks=np_fk_issm(sl_x=sl_x,sl_y=sl_y[:,None])
     fks=np.array(object=fks,dtype=float)
 
 #9. find maximum index
-ix,iy=np.unravel_index(indices=fks.argmax(),shape=fks.shape)
+iy,ix=np.unravel_index(indices=np.argmax(a=fks),shape=fks.shape) #cautious!
 
 #10. plot
 fig=plt.figure()
 ax=fig.subplots()
 ax.pcolormesh(sl_x,sl_y,fks,cmap="Reds")
-ax.scatter(x=sl_x[ix,iy],y=sl_y[ix,iy],s=200,c="green",marker="+")
+ax.scatter(x=sl_x[ix],y=sl_y[iy],s=200,c="green",marker="+")
 ax.scatter(x=sl_Pn*np.cos(angle),y=sl_Pn*np.sin(angle),s=200,c="blue",marker="+")
 ax.scatter(x=sl_P*np.cos(angle),y=sl_P*np.sin(angle),s=200,c="blue",marker="+")
 ax.set_xlabel(xlabel="sl_x(s/°)")
