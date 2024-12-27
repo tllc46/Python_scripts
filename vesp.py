@@ -61,7 +61,6 @@ slow=np.arange(stop=nslow+1)*(maxslow-minslow)/nslow+minslow
 beam=npvesp(slow)
 beam=np.stack(arrays=beam)
 beam/=beam.max()
-time,slow=np.meshgrid(time,slow)
 
 #theorital travel time, ray parameter
 model=TauPyModel(model="ak135")
