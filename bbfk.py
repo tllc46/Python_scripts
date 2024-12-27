@@ -132,10 +132,9 @@ arrivals=model.get_travel_times_geo(source_depth_in_km=st[0].stats.sac.evdp,sour
 p=arrivals[0].ray_param_sec_degree
 p*=0.05/111.19 #진동수 중심=0.05Hz
 
-kx,ky=np.meshgrid(k,k)
 fig=plt.figure()
 ax=fig.subplots()
-ax.pcolormesh(kx,ky,1/fks,cmap="Reds")
+ax.pcolormesh(k,k,1/fks,cmap="Reds")
 ax.scatter(x=p*np.cos(baz),y=p*np.sin(baz),s=200,c="blue",marker="+")
 ax.set_xlabel(xlabel="kx(1/km)")
 ax.set_ylabel(ylabel="ky(1/km)")
