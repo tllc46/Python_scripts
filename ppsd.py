@@ -170,11 +170,9 @@ def plot_histogram():
     for i in range(num_frequency_bins):
         current_histogram[:,i]=np.histogram(a=psd_values[:,i],bins=db_bin_edges)[0]*100/current_histogram_count
 
-    meshgrid=np.meshgrid(frequency_xedges,db_bin_edges)
-
     fig=plt.figure(figsize=(25.6,12.67))
     ax=fig.add_subplot()
-    quadmesh=ax.pcolormesh(meshgrid[0],meshgrid[1],current_histogram,cmap=cmap)
+    quadmesh=ax.pcolormesh(frequency_xedges,db_bin_edges,current_histogram,cmap=cmap)
     ax.plot(model_frequencies,nhnm,color="0.4",linewidth=2)
     ax.plot(model_frequencies,nlnm,color="0.4",linewidth=2)
     colorbar=fig.colorbar(mappable=quadmesh,ax=ax)
@@ -234,7 +232,6 @@ def plot_spectrogram():
     np_end_date=np.datetime64(end_date)
     np_step=np.timedelta64(int(step),"s")
     xedges=np.arange(start=np_start_date,stop=np_end_date+np.timedelta64(1,"D")+np_step,step=np_step)
-    meshgrid_x,meshgrid_y=np.meshgrid(xedges,frequency_xedges)
 
     psd_values=np.load(file=f"/home/tllc46/48NAS1/tllc46/UL/PPSD/{stnm}.npy")
     psd_values=ma.masked_equal(x=psd_values,value=-999999)
@@ -242,7 +239,7 @@ def plot_spectrogram():
 
     fig=plt.figure(figsize=(25.6,12.67))
     ax=fig.add_subplot()
-    quadmesh=ax.pcolormesh(meshgrid_x,meshgrid_y,psd_values,cmap="rainbow")
+    quadmesh=ax.pcolormesh(xedges,frequency_xedges,psd_values,cmap="rainbow")
     colorbar=fig.colorbar(mappable=quadmesh,ax=ax)
     colorbar.set_label(label="Amplitude [$(m/s^2)^2/Hz$] [dB]")
     ax.set_xlim(left=xedges[0],right=xedges[-1])
