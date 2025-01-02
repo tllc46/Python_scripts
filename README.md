@@ -27,6 +27,8 @@ rdsac.py: read SAC file
 
 savgol_filter-c.py: translated scipy.signal.savgol_filter()
 
+sgftops.py: Python version sgftops
+
 specfem1d.py: Python version 1D SpecFEM (homogeneous)
 
 specfem2d.py: Python version 2D SpecFEM (homogeneous)
