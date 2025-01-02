@@ -28,7 +28,6 @@ def execute_buffer():
     global textangle,imagecount,icount,doing_image
     global needmove,fillFlag
     global done
-    global x,y
 
     #are we in the middle of writing out an image?
     if doing_image:
