@@ -15,7 +15,7 @@ def analytic(omega):
 
 omega=np.arange(stop=N+1)*2*np.pi/N-np.pi
 
-dirac=20*2*np.pi/dT*np.ones(shape=len(omega))
+dirac=A*tau*2*np.pi/dT*np.ones(shape=len(omega))
 
 analy=np.array(object=[analytic(omega=omega_) for omega_ in omega])
 analy*=0.1*np.pi #정규화
