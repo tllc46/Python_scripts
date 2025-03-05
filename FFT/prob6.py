@@ -23,7 +23,7 @@ omega=np.arange(stop=N+1)*8*np.pi/N-4*np.pi
 
 #6-2
 complex_dft=sum(x_noise[:,np.newaxis]*np.exp(-1j*2*np.pi*seq*seq[:,np.newaxis]/N))
-abs_dft=0.25*abs(complex_dft) #normalization
+abs_dft=0.25*abs(complex_dft) #정규화
 abs_dft=np.concatenate((abs_dft[int(0.5*N):],abs_dft[:int(0.5*N)+1])) #rearrange to make omega's range -4*pi~4*pi
 
 #6-3
