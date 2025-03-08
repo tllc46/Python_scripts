@@ -1,40 +1,40 @@
 # python_scripts
-FFT: 박창업 교수님 강의록 문제 해답
+FFT: solutions to professor Changeop Par's Fourier Transform problems
 
-PyGMT: PyGMT 문제 해답
+PyGMT: solutions to PyGMT problems
 
-SpecFEM2D-pseudo: SpecFEM2D 의사 Python 코드 (미완성)
+SpecFEM2D-pseudo: SpecFEM2D pseudo Python code (incomplete)
 
-geophone_map: 네이버, 카카오 지도 자동 제작
+geophone_map: make Naver and Kakao maps automatically
 
-FE_region.py: Flinn-Engdahl 지역 목록
+FE_region.py: Flinn-Engdahl regionalization
 
-bbfk.py: (source)/fks/xbbfk.c를 Python으로 번역
+bbfk.py: python version sac bbfk, translated sac-102.0/src/fks/xbbfk.c
 
-cov_mat.py: 공분산 행렬 계산
+cov_mat.py: calculate covariance matrix
 
-evalresp.py: evalresp-5.0.1를 Python으로 번역
+evalresp.py: Python version evalresp-5.0.1
 
-fkan.py: 진동수-파수 해석
+fkan.py: frequency-wavenumber analysis
 
-noise_orientation.py: 이상준 교수님 지진계 방향 결정 코드를 Python으로 번역
+noise_orientation.py: Python version professor Sangjun Lee's seismometer orientation determination code
 
-ppsd.py: obspy.signal.spectral_estimation.PPSD 재작성
+ppsd.py: translated obspy.signal.spectral_estimation.PPSD
 
-rdmseed.py: MSEED 파일 읽기
+rdmseed.py: read MSEED file
 
-rdsac.py: SAC 파일 읽기
+rdsac.py: read SAC file
 
-savgol_filter-c.py: scipy.signal.savgol_filter 재작성
+savgol_filter-c.py: translated scipy.signal.savgol_filter()
 
-sgftops.py: sgftops를 Python으로 번역
+sgftops.py: Python version sgftops
 
-specfem1d.py: 1차원 SpecFEM (균질 매질)
+specfem1d.py: Python version 1D SpecFEM (homogeneous)
 
-specfem2d.py: 2차원 SpecFEM (균질 매질)
+specfem2d.py: Python version 2D SpecFEM (homogeneous)
 
-stft-c.py: scipy.signal.stft와 istft 재작성
+stft-c.py: translated scipy.signal.stft() and istft()
 
-tcas.py: astack/tcas.f를 Python으로 번역
+tcas.py: translated astack/tcas.f
 
-vesp.py: vespagram 그리기
+vesp.py: vespagram
