@@ -10,6 +10,7 @@ data=st[0].data[:360000]
 nperseg=40
 
 #stft
+#same as: result=scipy.signal.stft(x=data,nperseg=nperseg)[2]
 fac=np.arange(stop=nperseg+1)
 win=0.5*(1-np.cos(2*np.pi*fac/nperseg))[:-1]
 nfft=nperseg
@@ -28,6 +29,7 @@ for i in range(nseg):
 result*=scale
 
 #istft
+#same as: x=scipy.signal.istft(Zxx=result)[1]
 x=np.zeros(shape=pad_length)
 norm=np.zeros(shape=pad_length)
 for i in range(nseg):
