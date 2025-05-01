@@ -115,7 +115,7 @@ def calculate_psd():
 
         if st2:
             st1+=st2
-        st1.merge(method=1)
+            st1.merge(method=1)
         st1.trim(starttime=start_1d,endtime=start_1d+sec_1d+ppsd_length*overlap-delta)
 
         print(start_1d.strftime(format="%Y-%m-%d"),"| main processing...",file=stderr)
