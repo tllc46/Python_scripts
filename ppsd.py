@@ -143,8 +143,8 @@ def calculate_psd():
             spec/=respamp
             spec[spec<dtiny]=dtiny
             spec=10*np.log10(spec)
-            for i in range(num_frequency_bins):
-                psd_values[seg_idx,i]=np.mean(a=spec[left_idx[i]:right_idx[i]])
+            for k in range(num_frequency_bins):
+                psd_values[seg_idx,k]=np.mean(a=spec[left_idx[k]:right_idx[k]])
 
         next_day()
 
