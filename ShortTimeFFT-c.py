@@ -37,7 +37,7 @@ pmax=(n-win_zl)//hop+bool((n-win_zl)%hop) #n<=win_zl+p*hop
 pub=(n-win_zr)//hop+bool((n-win_zr)%hop) #n<=win_zr+p*hop
 kmin=pmin*hop-m_num_mid
 
-#ShortTimeFFT.stft
+#ShortTimeFFT.stft()
 #equivalent to S=ShortTimeFFT.stft(x=data,p0=p0,p1=p1)
 p0=pmin
 p1=pmax
@@ -69,7 +69,7 @@ for i in range(p1-p0):
     segment=x1[i*hop:i*hop+m_num]*win
     S[:,i]=np.fft.rfft(a=segment)
 
-#ShortTimeFFT.istft
+#ShortTimeFFT.istft()
 #equivalent to x=ShortTimeFFT.istft(S=S)
 x=np.zeros(shape=k1-k0)
 for i in range(p1-p0):
