@@ -41,7 +41,6 @@ kmin=pmin*hop-m_num_mid
 #equivalent to S=ShortTimeFFT.stft(x=data,p0=p0,p1=p1)
 p0=pmin
 p1=pmax
-npts=n
 
 k0=p0*hop-m_num_mid
 k1=p1*hop+(m_num-m_num_mid)
@@ -49,6 +48,7 @@ x1=np.zeros(shape=k1-k0)
 
 left_diff=0-k0
 right_diff=n-k1
+npts=n
 
 if 0<=left_diff:
     i0=0
