@@ -43,7 +43,7 @@ p0=pmin
 p1=pmax
 
 k0=p0*hop-m_num_mid
-k1=p1*hop+(m_num-m_num_mid)
+k1=(p1-1)*hop+(m_num-m_num_mid)
 x1=np.zeros(shape=k1-k0)
 
 left_diff=0-k0
@@ -75,4 +75,4 @@ x=np.zeros(shape=k1-k0)
 for i in range(p1-p0):
     xs=np.fft.irfft(a=S[:,i],n=m_num)*dual_win
     x[i*hop:i*hop+m_num]+=xs
-x=x[-kmin:-hop]
+x=x[-kmin:]
