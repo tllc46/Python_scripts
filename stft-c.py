@@ -9,7 +9,7 @@ data=st[0].data[:360000]
 
 nperseg_f=40
 
-#stft
+#stft()
 #equivalent to: result=scipy.signal.stft(x=data,nperseg=nperseg_f)[2]
 fac_f=np.arange(stop=nperseg_f+1)
 win_f=0.5*(1-np.cos(2*np.pi*fac_f/nperseg_f))[:-1]
@@ -28,7 +28,7 @@ for i in range(nseg):
     result[:,i]=np.fft.rfft(a=segment)
 result*=scale
 
-#istft
+#istft()
 #equivalent to: x=scipy.signal.istft(Zxx=result)[1]
 nperseg_b=(nfft//2)*2
 noverlap_b=nperseg_b//2
