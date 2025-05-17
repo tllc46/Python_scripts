@@ -143,7 +143,7 @@ def execute_buffer():
             EndPath()
             ofp.write(f"{gray_value} g\n")
             ofp.write(f"{x} {y} m\n")
-            fillFlag=1
+            fillFlag=True
             i+=7
 
         elif buffer[i]==-11: #plot filled rectangle
