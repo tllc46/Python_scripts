@@ -65,19 +65,18 @@ st_Z=Stream()
 st_N=Stream()
 st_E=Stream()
 
-bool_sub_Z=np.full(shape=n_sta,fill_value=False)
-bool_sub_N=np.full(shape=n_sta,fill_value=False)
-bool_sub_E=np.full(shape=n_sta,fill_value=False)
-bool_sub=np.full(shape=n_sta,fill_value=False)
+bool_sub_Z=np.zeros(shape=n_sta,dtype=bool)
+bool_sub_N=np.zeros(shape=n_sta,dtype=bool)
+bool_sub_E=np.zeros(shape=n_sta,dtype=bool)
+bool_sub=np.zeros(shape=n_sta,dtype=bool)
 
 spec_Z=np.empty(shape=(n_sta,n_rfft),dtype=complex)
 spec_N=np.empty(shape=(n_sta,n_rfft),dtype=complex)
 spec_E=np.empty(shape=(n_sta,n_rfft),dtype=complex)
 
-sym_fill=np.full(shape=(n_sta,n_close),fill_value=False)
+sym_fill=np.zeros(shape=(n_sta,n_close),dtype=bool)
 
 def code_idx_map():
-    global code_idx,pair_idx,idx_pair,sym_idx
     sta_idx=np.zeros(shape=(n_sta,n_sta),dtype=int)
 
     for i in range(n_sta):
@@ -205,9 +204,6 @@ def gap_check():
     n_E=len(st_sub_E)
 
 def sanity_check():
-    global bool_sub,bool_sub_Z,bool_sub_N,bool_sub_E
-    global spec_Z,spec_N,spec_E
-
     bool_sub_Z[:]=False
     bool_sub_N[:]=False
     bool_sub_E[:]=False
@@ -237,8 +233,6 @@ def fourier_trans(data):
     return result
 
 def spectra():
-    global spec_Z,spec_N,spec_E
-
     #Z
     for i in range(n_Z):
         idx=code_idx[st_sub_Z[i].stats.station]
@@ -266,10 +260,6 @@ def cross_correlate(spectrum1,spectrum2):
     return corr
 
 def stacking():
-    global ZZ_ls,NZ_ls,EZ_ls
-    global n_ZZ_ls,n_NZ_ls,n_EZ_ls
-    global sym_fill
-
     sym_fill[:,:]=False
 
     for i in range(n_sta): #행 방향
