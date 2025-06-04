@@ -5,7 +5,7 @@ from scipy.signal.windows import hann
 sampling_rate=100
 npts=48*sampling_rate
 
-def obspy_detrend(data):
+def detrend_obspy(data):
     data[:]=detrend(data=data)
 
 def taper(data,max_percentage):
