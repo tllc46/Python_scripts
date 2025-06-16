@@ -24,7 +24,7 @@ lat_grid=0.002*np.arange(stop=101)+32.8
 lon_grid=0.002*np.arange(stop=101)+130.95
 ele_grid=0.1*np.arange(start=-58,stop=17) #[km]
 vel_grid=np.zeros(shape=(101,101,75)) #(lat_grid,lon_grid,ele_grid)
-idx_grid=np.zeros(shape=(101,101,75),dtype=bool)
+idx_grid=np.zeros(shape=(101,101,75),dtype=bool) #(lat_grid,lon_grid,ele_grid)
 
 for i in range(101): #lat_grid
     for j in range(101): #lon_grid
