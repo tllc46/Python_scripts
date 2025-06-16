@@ -8,7 +8,7 @@ import pandas as pd
 
 import pykonal
 
-df=pd.read_csv(filepath_or_buffer="/home/tllc46/Documents/Aso/etc/center",sep=" ",names=["stnm","stla","stlo","stel"])
+df=pd.read_csv(filepath_or_buffer="center",sep=" ",names=["stnm","stla","stlo","stel"])
 df["stdp"]=-0.001*df["stel"] #station depth in [km]
 
 idx_sta=int(sys.argv[1])
@@ -17,7 +17,7 @@ sta_coordinates=[df.loc[idx_sta,"stlo"],df.loc[idx_sta,"stla"],df.loc[idx_sta,"s
 lat=0.002*np.arange(stop=101)+32.8
 lon=0.002*np.arange(stop=101)+130.95
 dep=0.1*np.arange(start=-16,stop=59) #[km]
-vel=np.load(file="/home/tllc46/Documents/Aso/modules/vel.npz")
+vel=np.load(file="vel.npz")
 vel=vel["vel"] #(lon,lat,dep)
 
 travel_times=np.empty(shape=(101,101,75)) #(lon,lat,dep)
