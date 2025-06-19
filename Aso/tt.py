@@ -20,7 +20,7 @@ lat=0.002*np.arange(stop=101)+32.8
 lon=0.002*np.arange(stop=101)+130.95
 dep=0.1*np.arange(start=-16,stop=59) #[km]
 
-vel=np.load(file="vel.npz")
+vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/loc/tt/vel.npz")
 vel=vel["vel"] #(lon,lat,dep)
 
 travel_times=np.empty(shape=(101,101,75)) #(lon,lat,dep)
