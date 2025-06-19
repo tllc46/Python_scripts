@@ -58,7 +58,7 @@ stnm_idx=dict(zip(df["stnm"],range(nsta)))
 idx_triu=np.triu_indices(n=nsta,k=1)
 
 #saving directory
-path_save=f"/home/tllc46/48NAS1/tllc46/Aso/loc/{year_start}.npz"
+path_save=f"/home/tllc46/48NAS1/tllc46/Aso/xcorr/part/{year_start}.npz"
 
 #Butterworth bandpass filter
 sos_butter=butter(N=4,Wn=[freqmin_filt,freqmax_filt],btype="band",fs=sampling_rate,output="sos")
