@@ -2,6 +2,8 @@ import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 import pandas as pd
 
+path_save="/home/tllc46/48NAS1/tllc46/Aso/loc/tt/vel.npz"
+
 topo=np.load(file="/home/tllc46/Downloads/topo/Aso_topo_10m.npz")
 topo=topo["topo"] #(6000,6750)=(lat_topo,lon_topo) [m]
 lat_topo=np.arange(stop=6000)/9000+(32.5835-1/9000)
@@ -40,4 +42,4 @@ vel_grid=np.swapaxes(a=vel_grid,axis1=0,axis2=1) #(lon_grid,lat_grid,ele_grid)
 vel_grid=np.flip(m=vel_grid,axis=2) #(lon_grid,lat_grid,dep_grid)
 idx_grid=np.swapaxes(a=idx_grid,axis1=0,axis2=1) #(lon_grid,lat_grid,ele_grid)
 idx_grid=np.flip(m=idx_grid,axis=2) #(lon_grid,lat_grid,dep_grid)
-np.savez(file="vel.npz",vel=vel_grid,idx_flat=idx_grid.flatten())
+np.savez(file=path_save,vel=vel_grid,idx_flat=idx_grid.flatten())
