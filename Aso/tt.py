@@ -13,10 +13,13 @@ df["stdp"]=-0.001*df["stel"] #station depth in [km]
 
 idx_sta=int(sys.argv[1])
 sta_coordinates=[df.loc[idx_sta,"stlo"],df.loc[idx_sta,"stla"],df.loc[idx_sta,"stdp"]]
+stnm=df.loc[idx_sta,"stnm"]
+path_save="/home/tllc46/48NAS1/tllc46/Aso/loc/tt/"+stnm+".npz"
 
 lat=0.002*np.arange(stop=101)+32.8
 lon=0.002*np.arange(stop=101)+130.95
 dep=0.1*np.arange(start=-16,stop=59) #[km]
+
 vel=np.load(file="vel.npz")
 vel=vel["vel"] #(lon,lat,dep)
 
@@ -65,4 +68,4 @@ if not success:
 
 travel_times[:,:,:]=np.flip(m=np.flip(m=np.swapaxes(a=solver.traveltime.values,axis1=0,axis2=2),axis=2),axis=1) #(increasing lon,increasing lat,increasing dep)
 travel_times[np.isinf(travel_times)]=0
-np.savez(file=f"tt_{idx_sta:02}.npz",travel_times_flat=travel_times.flatten())
+np.savez(file=path_save,travel_times_flat=travel_times.flatten())
