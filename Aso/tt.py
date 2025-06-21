@@ -16,14 +16,15 @@ sta_coordinates=[df.loc[idx_sta,"stlo"],df.loc[idx_sta,"stla"],df.loc[idx_sta,"s
 stnm=df.loc[idx_sta,"stnm"]
 path_save="/home/tllc46/48NAS1/tllc46/Aso/loc/tt/"+stnm+".npz"
 
-lat=0.002*np.arange(stop=101)+32.8
-lon=0.002*np.arange(stop=101)+130.95
-dep=0.1*np.arange(start=-16,stop=59) #[km]
-
 vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/loc/tt/vel.npz")
+lon=vel["lon"]
+lat=vel["lat"]
+dep=vel["dep"]
+res=vel["res"] #(lon,lat,dep)
+num=vel["num"] #(lon,lat,dep)
 vel=vel["vel"] #(lon,lat,dep)
 
-travel_times=np.empty(shape=(101,101,75)) #(lon,lat,dep)
+travel_times=np.empty(shape=tuple(num)) #(lon,lat,dep)
 
 # Origin of the grid in spherical coordinates
 origin_geo=[lat[-1],lon[0],dep[-1]]
@@ -31,7 +32,7 @@ origin_sph=pykonal.transformations.geo2sph(nodes=origin_geo) #radius (6371km ear
 r_min,theta_min,phi_min=origin_sph #r,θ,φ
 
 # Extract resolutions
-lon_res,lat_res,dep_res=(0.002,0.002,0.1)
+lon_res,lat_res,dep_res=res
 lon_res=np.deg2rad(lon_res)
 lat_res=np.deg2rad(lat_res)
 
@@ -41,7 +42,7 @@ solver=pykonal.solver.PointSourceSolver(coord_sys="spherical")
 # Define the computational grid
 solver.velocity.min_coords=origin_sph #r,θ,φ
 solver.velocity.node_intervals=(dep_res,lat_res,lon_res) #dr,dθ,dφ
-num_lon,num_lat,num_dep=(101,101,75)
+num_lon,num_lat,num_dep=num
 solver.velocity.npts=(num_dep,num_lat,num_lon) #r,θ,φ
 solver.velocity.values=np.flip(m=np.flip(m=np.swapaxes(a=vel,axis1=0,axis2=2),axis=1),axis=0) #(decreasing dep,decreasing lat,increasing lon)
 
@@ -68,4 +69,5 @@ if not success:
 
 travel_times[:,:,:]=np.flip(m=np.flip(m=np.swapaxes(a=solver.traveltime.values,axis1=0,axis2=2),axis=2),axis=1) #(increasing lon,increasing lat,increasing dep)
 travel_times[np.isinf(travel_times)]=0
-np.savez(file=path_save,travel_times_flat=travel_times.flatten())
+print(stnm,np.sum(a=travel_times))
+np.savez(file=path_save,travel_times=travel_times.flatten())
