@@ -24,7 +24,7 @@ res=vel["res"] #(lon,lat,dep)
 num=vel["num"] #(lon,lat,dep)
 vel=vel["vel"] #(lon,lat,dep)
 
-travel_times=np.empty(shape=tuple(num)) #(lon,lat,dep)
+travel_times=np.empty(shape=num) #(lon,lat,dep)
 
 # Origin of the grid in spherical coordinates
 origin_geo=[lat[-1],lon[0],dep[-1]]
