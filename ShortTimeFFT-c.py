@@ -20,9 +20,9 @@ m_num_mid=m_num//2
 nonzl=np.flatnonzero(a=win)[0]
 nonzr=(m_num-1)-np.flatnonzero(a=win)[-1]
 win_l=-m_num_mid
-win_zl=win_l+nonzl
+win_zl=win_l+nonzl #first non-zero window element index
 win_r=(m_num-1)-m_num_mid
-win_zr=win_r-nonzr
+win_zr=win_r-nonzr #last non-zero window element index
 
 w2=win**2
 DD=w2.copy()
