@@ -21,7 +21,7 @@ pad_length=(nperseg_f//2)*2+len(data)+nadd
 x=np.zeros(shape=pad_length)
 x[nperseg_f//2:-(nperseg_f//2)-nadd]=data
 scale=1/(0.5*nperseg_f) #integral of hann window
-nseg=(pad_length-nperseg_f+1)//nstep_f+bool((pad_length-nperseg_f+1)%nstep_f)
+nseg=(pad_length-nperseg_f)//nstep_f+1 #(nseg-1)*nstep_f+nperseg_f<=pad_length
 result=np.empty(shape=(nfft//2+1,nseg),dtype=complex)
 for i in range(nseg):
     segment=x[i*nstep_f:i*nstep_f+nperseg_f]*win_f
