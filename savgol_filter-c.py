@@ -1,4 +1,5 @@
 #implementation of scipy.signal.savgol_filter()
+#equivalent to y=scipy.signal.savgol_filter(x=data,window_length=window_length,polyorder=polyorder)
 
 import numpy as np
 from numpy.linalg import inv
