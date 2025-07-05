@@ -13,7 +13,7 @@ halflen=window_length//2
 
 y=np.empty(shape=npts)
 
-#moving average
+#moving average python trick
 data_cumsum=np.cumsum(a=data)
 y[halflen+1:-halflen]=data_cumsum[window_length:]-data_cumsum[:-window_length]
 y[halflen]=data_cumsum[window_length-1]
