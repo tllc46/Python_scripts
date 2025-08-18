@@ -110,7 +110,7 @@ if isfile(path=path_save):
     print("figure already exists")
     exit()
 
-def back_project():
+def beamform():
     global xcorr_pair,beam
     nstack=0
     beam[:]=0
@@ -232,7 +232,7 @@ def plot():
     plot_3d()
 
 def main():
-    back_project()
+    beamform()
     plot()
 
 main()
