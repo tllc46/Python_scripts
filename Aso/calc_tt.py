@@ -1,7 +1,9 @@
 #usage
-#python tt.py 8
+#v01_main.py → calc_tt.py → vel_reduce.py → calc_dtt.py
+#python calc_tt.py v01 8
 
 import sys
+from os.path import isfile
 
 import numpy as np
 import pandas as pd
@@ -11,17 +13,22 @@ import pykonal
 df=pd.read_csv(filepath_or_buffer="center",sep=" ",names=["stnm","stla","stlo","stel"])
 df["stdp"]=-0.001*df["stel"] #station depth in [km]
 
-idx_sta=int(sys.argv[1])
+idx_sta=int(sys.argv[2])
 sta_coordinates=[df.loc[idx_sta,"stlo"],df.loc[idx_sta,"stla"],df.loc[idx_sta,"stdp"]]
 stnm=df.loc[idx_sta,"stnm"]
-path_save="/home/tllc46/48NAS1/tllc46/Aso/loc/tt/"+stnm+".npz"
+path_save="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/"+stnm+".npz"
+if isfile(path=path_save):
+    print("data already exists")
+    exit()
 
-vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/loc/tt/vel.npz")
+vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/vel_orig.npz")
 lon=vel["lon"]
 lat=vel["lat"]
 dep=vel["dep"]
 res=vel["res"] #(lon,lat,dep)
 num=vel["num"] #(lon,lat,dep)
+idx_lon=vel["idx_lon"]
+idx_lat=vel["idx_lat"]
 vel=vel["vel"] #(lon,lat,dep)
 
 travel_times=np.empty(shape=num) #(lon,lat,dep)
@@ -68,6 +75,7 @@ if not success:
     exit()
 
 travel_times[:,:,:]=np.flip(m=np.flip(m=np.swapaxes(a=solver.traveltime.values,axis1=0,axis2=2),axis=2),axis=1) #(increasing lon,increasing lat,increasing dep)
+travel_times=travel_times[idx_lon[0]:idx_lon[1],idx_lat[0]:idx_lat[1]]
 travel_times[np.isinf(travel_times)]=0
 print(stnm,np.sum(a=travel_times))
 np.savez(file=path_save,travel_times=travel_times.flatten())
