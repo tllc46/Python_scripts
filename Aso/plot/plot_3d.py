@@ -1,17 +1,13 @@
 #usage
 #python plot_3d.py
 
-import sys
 from os import makedirs
 from os.path import isdir,isfile
-from importlib import import_module
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import pandas as pd
-
-sys.path.append("/home/tllc46/Aso/xcorr")
 
 #figure
 crater=[131.084935,32.884906,-1.506] #(lon,lat,dep)
