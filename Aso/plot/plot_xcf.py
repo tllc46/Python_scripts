@@ -1,5 +1,5 @@
 #usage
-#python plot_lklhd.py t01 x02 v01 b04 2016-10-19T03:00:00
+#python plot_xcf.py t01 x02 v01 b04 2016-10-19T03:00:00
 
 import sys
 from os import makedirs
