@@ -11,7 +11,7 @@ delta=st[0].stats.delta
 lag=delta*np.arange(start=-npts+1,stop=npts)
 
 npts_2pow=next_pow_2(i=2*npts-1)
-nfft=int(0.5*npts_2pow)+1
+nfft=npts_2pow//2+1
 fourier=np.empty(shape=(nsta,nfft),dtype=complex)
 factor=np.empty(shape=nsta)
 L=np.zeros(shape=(nsta,nsta))
