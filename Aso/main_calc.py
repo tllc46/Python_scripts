@@ -49,9 +49,9 @@ npts_sub=len_sub*sampling_rate
 
 #average window
 nsub_avg=100
-len_avg=shift_sub*nsub_avg
-npts_avg=(len_avg+ovrlp_sub)*sampling_rate
-npts_avg_0=(len_avg+ovrlp_sub)*sampling_rate_0
+len_avg=shift_sub*nsub_avg+ovrlp_sub
+npts_avg=len_avg*sampling_rate
+npts_avg_0=len_avg*sampling_rate_0
 shift_avg=mdl_t.shift_avg
 offset_avg=mdl_t.offset_avg
 navg_day=sec_day//shift_avg
@@ -340,7 +340,7 @@ def calc_day():
 
         idx_avg=idx_day*navg_day+i
         start_avg=udt_cur+offset_avg+i*shift_avg
-        st_avg=st_cur.slice(starttime=start_avg,endtime=start_avg+len_avg+ovrlp_sub-delta)
+        st_avg=st_cur.slice(starttime=start_avg,endtime=start_avg+len_avg-delta)
 
         if st_step=="conti" and calc_type=="xcorr":
             st2data_order()
@@ -381,7 +381,7 @@ def main_conti():
     read_cur()
     for idx_day in range(nday):
         read_next()
-        st_cur+=st_next.slice(endtime=udt_next+ovrlp_avg+ovrlp_sub-delta)
+        st_cur+=st_next.slice(endtime=udt_next+ovrlp_avg-delta)
         st_cur.merge(method=1)
 
         calc_day()
