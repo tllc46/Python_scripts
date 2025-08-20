@@ -32,9 +32,9 @@ for k in range(hop,m_num,hop):
 dual_win=win/DD
 
 pmin=-(win_r//hop) #0<=win_r+p*hop
-plb=np.ceil((-win_zl)/hop) #0<=win_zl+p*hop
-pmax=np.ceil((n-win_zl)/hop) #n<=win_zl+p*hop
-pub=np.ceil((n-win_zr)/hop) #n<=win_zr+p*hop
+plb=int(np.ceil((-win_zl)/hop)) #0<=win_zl+p*hop
+pmax=int(np.ceil((n-win_zl)/hop)) #n<=win_zl+p*hop
+pub=int(np.ceil((n-win_zr)/hop)) #n<=win_zr+p*hop
 kmin=pmin*hop-m_num_mid
 
 #ShortTimeFFT.stft()
