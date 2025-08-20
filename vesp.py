@@ -20,7 +20,7 @@ def vesp(slow):
 
     #time shift 계산
     timeshift=get_timeshift(geometry=geometry,sll_x=sx,sll_y=sy,sl_s=0,grdpts_x=1,grdpts_y=1).squeeze()
-    timeshift=delta*np.rint(timeshift/delta)
+    timeshift=delta*np.round(timeshift/delta).astype(dtype=int)
 
     st_stack=st.copy()
 
@@ -54,7 +54,7 @@ geometry=geometry[:-1]
 _,_,baz=gps2dist_azimuth(lat1=st[0].stats.sac.evla,lon1=st[0].stats.sac.evlo,lat2=center[1],lon2=center[0])
 
 delta=st[0].stats.delta
-time=np.arange(stop=int((tend-tbegin)/delta)+1)*delta+tbegin
+time=np.arange(stop=(tend-tbegin)//delta+1)*delta+tbegin
 slow=np.arange(stop=nslow+1)*(maxslow-minslow)/nslow+minslow
 
 #beamforming
