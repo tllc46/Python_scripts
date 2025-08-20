@@ -50,7 +50,7 @@ bp_dft=complex_dft*bp
 x_bp=sum(bp_dft[:,np.newaxis]*np.exp(1j*2*np.pi*seq*seq[:,np.newaxis]/N)).real/N
 
 #6-6
-omega_sym=np.concatenate((omega[int(0.5*N):-1],omega[int(0.5*N)+1:][::-1]))
+omega_sym=np.concatenate((omega[N//2:-1],omega[N//2+1:][::-1]))
 gauss=np.exp(-0.25*(35*(omega_sym-omega_n[:,np.newaxis]))**2)
 gauss_dft=complex_dft*gauss
 x_gauss=np.sum(a=gauss_dft[:,:,np.newaxis]*np.exp(1j*2*np.pi*seq*seq[:,np.newaxis]/N),axis=1).real/N
@@ -76,7 +76,7 @@ gs=fig.add_gridspec(nrows=4,ncols=1)
 ax1=fig.add_subplot(gs[:3,0])
 ax1.plot(omega,abs_dft)
 ax2=fig.add_subplot(gs[3,0],sharex=ax1)
-ax2.plot(omega,np.concatenate((lp[int(0.5*N):],lp[:int(0.5*N)+1])),color="r")
+ax2.plot(omega,np.concatenate((lp[N//2:],lp[:N//2+1])),color="r")
 ax2.set_xlim(left=-4*np.pi,right=4*np.pi)
 ax2.set_xlabel(xlabel="$\\omega$(rad/s)")
 ax1.label_outer()
@@ -97,7 +97,7 @@ gs=fig.add_gridspec(nrows=4,ncols=1)
 ax1=fig.add_subplot(gs[:3,0])
 ax1.plot(omega,abs_dft)
 ax2=fig.add_subplot(gs[3,0],sharex=ax1)
-ax2.plot(omega,np.concatenate((hp[int(0.5*N):],hp[:int(0.5*N)+1])),color="r")
+ax2.plot(omega,np.concatenate((hp[N//2:],hp[:N//2+1])),color="r")
 ax2.set_xlim(left=-4*np.pi,right=4*np.pi)
 ax2.set_xlabel(xlabel="$\\omega$(rad/s)")
 ax1.label_outer()
@@ -116,7 +116,7 @@ gs=fig.add_gridspec(nrows=4,ncols=1)
 ax1=fig.add_subplot(gs[:3,0])
 ax1.plot(omega,abs_dft)
 ax2=fig.add_subplot(gs[3,0],sharex=ax1)
-ax2.plot(omega,np.concatenate((bp[int(0.5*N):],bp[:int(0.5*N)+1])),color="r")
+ax2.plot(omega,np.concatenate((bp[N//2:],bp[:N//2+1])),color="r")
 ax2.set_xlim(left=-4*np.pi,right=4*np.pi)
 ax2.set_xlabel(xlabel="$\\omega$(rad/s)")
 ax1.label_outer()
@@ -137,7 +137,7 @@ ax1.plot(omega,abs_dft)
 ax1.label_outer()
 for i in range(3,6):
     ax=fig.add_subplot(gs[i,0],sharex=ax1)
-    ax.plot(omega,np.concatenate((gauss[i-3,int(0.5*N):],gauss[i-3,:int(0.5*N)+1])),color="r")
+    ax.plot(omega,np.concatenate((gauss[i-3,N//2:],gauss[i-3,:N//2+1])),color="r")
     if i!=5:
         ax.label_outer()
     else:
