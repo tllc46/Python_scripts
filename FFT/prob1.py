@@ -5,7 +5,7 @@ A=1
 omega0=0.5
 T=128
 dt=1
-N=int(T/dt)
+N=T//dt
 
 def analytic(omega):
     if omega==omega0 or omega==-omega0:
@@ -23,8 +23,8 @@ seq=np.arange(stop=N)
 complex_dft=sum(A*np.cos(omega0*seq[:,np.newaxis])*np.exp(-1j*2*np.pi*seq*seq[:,np.newaxis]/N))
 abs_dft=2*np.pi/128*abs(complex_dft) #정규화
 angle_dft=np.angle(z=complex_dft)
-abs_dft=np.concatenate((abs_dft[int(0.5*N):],abs_dft[:int(0.5*N)+1])) #omega 범위가 -pi ~ pi가 되도록 재배열
-angle_dft=np.concatenate((angle_dft[int(0.5*N):],angle_dft[:int(0.5*N)+1]))
+abs_dft=np.concatenate((abs_dft[N//2:],abs_dft[:N//2+1])) #omega 범위가 -pi ~ pi가 되도록 재배열
+angle_dft=np.concatenate((angle_dft[N//2:],angle_dft[:N//2+1]))
 
 fig=plt.figure(1)
 ax=fig.subplots()
