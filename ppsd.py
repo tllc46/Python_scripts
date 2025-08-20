@@ -24,7 +24,7 @@ nfft=ppsd_length*sampling_rate*4/16
 nfft=prev_pow_2(i=nfft)
 
 nlap=int(0.75*nfft) #75% overlap
-seg_len=int(sampling_rate*ppsd_length) #original code: _len
+seg_len=sampling_rate*ppsd_length #original code: _len
 
 SFT=ShortTimeFFT(win=fft_taper(data=np.ones(shape=nfft)),hop=nfft-nlap,fs=sampling_rate,scale_to="psd",phase_shift=None)
 _,p_lb=SFT.lower_border_end
@@ -40,7 +40,7 @@ frequency_xedges=frequency_limits[0]*np.power(2,frequency_xedges_exp)
 num_db_bins=int((db_bins[1]-db_bins[0])/db_bins[2])
 db_bin_edges=np.linspace(start=db_bins[0],stop=db_bins[1],num=num_db_bins+1)
 
-step=ppsd_length*(1-overlap)
+step=int(ppsd_length*(1-overlap))
 
 stnm=sys.argv[1]
 
@@ -49,8 +49,8 @@ start_date="2021-07-01"
 end_date="2023-06-30"
 udt_start_date=UTCDateTime(start_date)
 udt_end_date=UTCDateTime(end_date)
-n_day=int((udt_end_date-udt_start_date)/sec_1d)+1
-n_seg_1d=int(sec_1d/step)
+n_day=(udt_end_date-udt_start_date)//sec_1d+1
+n_seg_1d=sec_1d//step
 n_seg=n_day*n_seg_1d
 
 noise_model_file="/home/tllc46/anaconda3/envs/seis/lib/python3.11/site-packages/obspy/signal/data/noise_models.npz"
@@ -70,7 +70,7 @@ def calculate_psd():
 
     frequency_bin_left_edges_exp=frequency_bin_centers_exp-0.5*period_smoothing_width_octaves
     frequency_bin_right_edges_exp=frequency_bin_centers_exp+0.5*period_smoothing_width_octaves
-    psd_frequency_order=np.arange(start=1,stop=int(nfft/2)+1)
+    psd_frequency_order=np.arange(start=1,stop=nfft//2+1)
     psd_frequency_log2=np.log2(psd_frequency_order)
     left_idx=np.searchsorted(a=psd_frequency_log2,v=frequency_bin_left_edges_exp)
     right_idx=np.searchsorted(a=psd_frequency_log2,v=frequency_bin_right_edges_exp,side="right")
@@ -230,7 +230,7 @@ def plot_statistics():
 def plot_spectrogram():
     np_start_date=np.datetime64(start_date)
     np_end_date=np.datetime64(end_date)
-    np_step=np.timedelta64(int(step),"s")
+    np_step=np.timedelta64(step,"s")
     xedges=np.arange(start=np_start_date,stop=np_end_date+np.timedelta64(1,"D")+np_step,step=np_step)
 
     psd_values=np.load(file=f"/home/tllc46/48NAS1/tllc46/UL/PPSD/{stnm}.npy")
