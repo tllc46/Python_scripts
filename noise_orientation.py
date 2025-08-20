@@ -2,7 +2,6 @@ import glob
 from os.path import exists
 from os import mkdir
 from sys import stderr
-from pprint import pprint
 
 import numpy as np
 import numpy.ma as ma
@@ -15,16 +14,16 @@ from obspy.io.sac import SACTrace
 sec_1d=86400
 
 len_sub=3600
-shift_sub=0.5*len_sub
+shift_sub=len_sub//2
 
-n_sub_1d=int(sec_1d/shift_sub)
+n_sub_1d=sec_1d//shift_sub
 
 n_sub_tot=24
-n_sub_shift=int(0.5*n_sub_tot)
+n_sub_shift=n_sub_tot//2
 
 sampling_rate_0=200
 sampling_rate=10
-factor=int(sampling_rate_0/sampling_rate)
+factor=sampling_rate_0//sampling_rate
 delta=1/sampling_rate
 
 npts_sub=sampling_rate*len_sub
@@ -35,7 +34,7 @@ f_min_idx=int(np.ceil(freq_min*n_freq/sampling_rate))
 f_max_idx=int(np.floor(freq_max*n_freq/sampling_rate))
 n_mov_win=40
 n_lag=2048
-n_rfft=int(0.5*n_freq)+1
+n_rfft=n_freq//2+1
 
 n_close=5
 
@@ -228,7 +227,7 @@ def sanity_check():
 def fourier_trans(data):
     spectrum=np.fft.rfft(a=np.sign(data),n=n_freq) #1비트 정규화, Fourier 변환
     norm=np.convolve(a=abs(spectrum),v=np.ones(shape=2*n_mov_win+1),mode="valid") #npwing 길이의 이동 평균
-    result=np.zeros(shape=int(0.5*n_freq)+1,dtype=complex)
+    result=np.zeros(shape=n_freq//2+1,dtype=complex)
     result[f_min_idx:f_max_idx+1]=spectrum[f_min_idx:f_max_idx+1]/norm[f_min_idx-n_mov_win:f_max_idx+1-n_mov_win]*(2*n_mov_win+1) #spectral whitening
     return result
 
