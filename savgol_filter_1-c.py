@@ -19,7 +19,7 @@ y[halflen+1:-halflen]=data_cumsum[window_length:]-data_cumsum[:-window_length]
 y[halflen]=data_cumsum[window_length-1]
 y[halflen:-halflen]/=window_length
 
-#_fit_edge
+#scipy.signal._savitzky_golay._fit_edge()
 #in case of polyorder=1, just linear regression
 t_half=np.arange(start=-halflen,stop=halflen+1)
 denom=halflen*(halflen+1)*window_length//3
