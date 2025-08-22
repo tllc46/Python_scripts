@@ -153,11 +153,14 @@ def plot_xcf(idx_loc,ax):
     ax.set_yticks(ticks=[])
     ax.set_ylim(bottom=-1,top=nstack+2)
 
-fig=plt.figure(figsize=(10,14.4))
-fig.set_layout_engine(layout="constrained")
-axes=fig.subplots(ncols=2)
+def main():
+    fig=plt.figure(figsize=(10,14.4))
+    fig.set_layout_engine(layout="constrained")
+    axes=fig.subplots(ncols=2)
 
-plot_xcf(idx_loc=idx_loc,ax=axes[0])
+    plot_xcf(idx_loc=idx_loc,ax=axes[0])
 
-fig.suptitle(t=sys.argv[2]+"."+sys.argv[3]+"."+sys.argv[4]+"."+sys.argv[5])
-fig.savefig(fname=path_save)
+    fig.suptitle(t=sys.argv[2]+"."+sys.argv[3]+"."+sys.argv[4]+"."+sys.argv[5])
+    fig.savefig(fname=path_save)
+
+main()
