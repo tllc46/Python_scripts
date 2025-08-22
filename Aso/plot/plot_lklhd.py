@@ -164,6 +164,10 @@ def init_topo():
     topo=-0.001*topo[idx_lat_min:idx_lat_max,idx_lon_min:idx_lon_max]
 
 def plot_3d():
+    vmin=min(np.min(a=lat_lon),np.nanmin(a=lat_dep),np.nanmin(a=dep_lon))
+    vmax=max(np.max(a=lat_lon),np.nanmax(a=lat_dep),np.nanmax(a=dep_lon))
+    levels=np.linspace(start=vmin,stop=vmax,num=20)
+
     fig=plt.figure(figsize=(25.6,14.4))
     fig.set_layout_engine(layout="constrained")
     axes=fig.subplots(nrows=2,ncols=2,width_ratios=[2,1],height_ratios=[2,1])
@@ -218,7 +222,6 @@ def plot_3d():
 
 def main():
     global lat_lon,lat_dep,dep_lon
-    global levels
 
     beamform()
 
@@ -227,9 +230,6 @@ def main():
     lat_lon=beam[np.arange(stop=num[0])[:,None],np.arange(stop=num[1]),idx_topo].T
     lat_dep=beam[idx_loc[0]]
     dep_lon=beam[:,idx_loc[1]].T
-    vmin=min(np.min(a=lat_lon),np.nanmin(a=lat_dep),np.nanmin(a=dep_lon))
-    vmax=max(np.max(a=lat_lon),np.nanmax(a=lat_dep),np.nanmax(a=dep_lon))
-    levels=np.linspace(start=vmin,stop=vmax,num=20)
 
     plot_3d()
 
