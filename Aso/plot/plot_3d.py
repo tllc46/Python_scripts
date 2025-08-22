@@ -43,7 +43,7 @@ vmax=max(np.max(a=lat_lon),np.nanmax(a=lat_dep),np.nanmax(a=dep_lon))
 levels=np.linspace(start=vmin,stop=vmax,num=20)
 
 #station
-df=pd.read_csv(filepath_or_buffer="/home/tllc46/Aso/center,sep=" ",names=["stnm","stla","stlo","stel"])
+df=pd.read_csv(filepath_or_buffer="/home/tllc46/Aso/center",sep=" ",names=["stnm","stla","stlo","stel"])
 df["stdp"]=-0.001*df["stel"]
 
 #saving directory
