@@ -32,13 +32,13 @@ def savgol_coeffs():
 
 coeffs=savgol_coeffs()
 
-#convolve_1d
+#scipy.ndimage.convolve1d()
 y=np.empty(shape=npts)
 for i in range(halflen,npts-halflen):
     start_idx=i-(window_length-1)//2
     y[i]=sum(data[start_idx:start_idx+window_length]*coeffs)
 
-#_fit_edge
+#scipy.signal._savitzky_golay._fit_edge()
 x=np.arange(stop=window_length)[:,None]
 order=np.arange(stop=polyorder+1)
 A=x**order #(window_length,polyorder+1)
