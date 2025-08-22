@@ -216,9 +216,11 @@ def plot_3d():
     fig.suptitle(t=sys.argv[2]+"."+sys.argv[3]+"."+sys.argv[4]+"."+sys.argv[5])
     fig.savefig(fname=path_save)
 
-def plot():
+def main():
     global lat_lon,lat_dep,dep_lon
     global levels
+
+    beamform()
 
     init_topo()
 
@@ -230,9 +232,5 @@ def plot():
     levels=np.linspace(start=vmin,stop=vmax,num=20)
 
     plot_3d()
-
-def main():
-    beamform()
-    plot()
 
 main()
