@@ -19,7 +19,7 @@ def taper(data,max_percentage):
     data[-wlen:]*=taper_sides[::-1]
 
 def bandpass(data,freqmin,freqmax):
-    sos=butter(N=4,Wn=[freqmin,freqmax],btype="band",fs=sampling_rate,output="sos")
+    sos=butter(N=4,Wn=[freqmin,freqmax],btype="bandpass",fs=sampling_rate,output="sos")
     data[:]=sosfilt(sos=sos,x=data)
     data[:]=sosfilt(sos=sos,x=data[::-1])[::-1]
 
