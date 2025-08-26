@@ -31,8 +31,8 @@ idx_dtt=np.empty(shape=(ntriu,nnode),dtype=int)
 
 for i in range(nsta):
     stnm=df.loc[i,"stnm"]
-    travel_times_flat=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/"+stnm+".npz") #(nnode,)
-    travel_times[i,:]=travel_times_flat["travel_times"]
+    travel_times_flat=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/"+stnm+".npz")
+    travel_times[i,:]=travel_times_flat["travel_times"] #(nnode,)
 
 for i in range(nsta):
     for j in range(i+1,nsta):
