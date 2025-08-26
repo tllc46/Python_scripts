@@ -70,7 +70,6 @@ idx_loc=loc["idx_loc"][:,idx_avg] #(3,)
 
 #station
 df=pd.read_csv(filepath_or_buffer=mdl_x.info_sta,sep=" ",names=["stnm","stla","stlo","stel"])
-df["stdp"]=-0.001*df["stel"]
 nsta=len(df)
 stnm_pairs=[]
 for i in range(nsta):
