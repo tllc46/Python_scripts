@@ -1,3 +1,4 @@
+from io import StringIO
 import pandas as pd
 from obspy.geodetics import gps2dist_azimuth
 import pygmt
@@ -20,7 +21,32 @@ pygmt.makecpt(cmap="polar",series=[-t_max,t_max])
 fig.plot(x=df_O["longitude"],y=df_O["latitude"],size=2*abs(df_O["residual"])+0.1,cmap=True,fill=df_O["residual"],style="cc",pen=True)
 fig.plot(x=df_X["longitude"],y=df_X["latitude"],style="+0.15c")
 fig.text(x=df["longitude"],y=df["latitude"],text=df["name"],font="5p",justify="RB",offset="j0.1c",fill="white@40")
-fig.colorbar(frame=[0.05,"x+lresidual (s)"],position="JCB+w4c")
+
+#legend
+pygmt.makecpt(cmap="polar",output="polar.cpt",series=[-t_max,t_max])
+legend_spec=StringIO(initial_value="""
+A polar.cpt
+N 7
+S C c 0.4c z=-0.15 ,,
+S C c 0.3c z=-0.1 ,,
+S C c 0.2c z=-0.05 ,,
+S C c 0.1c z=0 ,,
+S C c 0.2c z=0.05 ,,
+S C c 0.3c z=0.1 ,,
+S C c 0.4c z=0.15 ,,
+G 0.1c
+L 7p C -0.15
+L 7p C -0.1
+L 7p C -0.05
+L 7p C 0
+L 7p C 0.05
+L 7p C 0.1
+L 7p C 0.15
+G 0.05c
+N
+L 9p C residual (s)
+""")
+fig.legend(spec=legend_spec,position="JCB+w5c+o0c/0.5c")
 
 #inset plot
 with fig.inset(position="jRB+o0.1c",projection="xy/1.5c",region=[0,1,0,1]):
