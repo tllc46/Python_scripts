@@ -19,10 +19,10 @@ mdl_x=import_module(name=sys.argv[2])
 mdl_b=import_module(name=sys.argv[4])
 
 #sampling rate
-sampling_rate=100
+sampling_rate=100 #[Hz]
 
 #sub window
-len_sub=48
+len_sub=48 #[s]
 npts_sub=len_sub*sampling_rate
 
 #velocity
@@ -55,7 +55,7 @@ choice_single=np.ones(shape=nsta,dtype=bool)
 for i in mdl_b.exclude_single:
     idx_stnm=df[df["stnm"]==i].index[0]
     choice_single[idx_stnm]=False
-choice_pair=(choice_single[:,None] & choice_single)[idx_triu]
+choice_pair=(choice_single[:,None] & choice_single)[idx_triu] #(ntriu,)
 for i in mdl_b.exclude_pair:
     idx_pair=stnm_pairs.index(i)
     choice_pair[idx_pair]=False
