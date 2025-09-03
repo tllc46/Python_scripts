@@ -38,6 +38,6 @@ for i in range(nsta):
     for j in range(i+1,nsta):
         idx_triu=i*(nsta-1)-i*(i+1)//2+(j-1)
         diff_travel_times[:]=travel_times[i]-travel_times[j]
-        idx_dtt[idx_triu,:]=np.round(a=sampling_rate*diff_travel_times).astype(dtype=int)+npts_sub//2
+        idx_dtt[idx_triu,:]=np.round(a=sampling_rate*diff_travel_times).astype(dtype=int)
 
 np.savez(file=path_save,idx_dtt=idx_dtt)
