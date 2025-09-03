@@ -9,8 +9,6 @@ import numpy as np
 import pandas as pd
 
 sampling_rate=100 #[Hz]
-len_sub=48 #[s]
-npts_sub=len_sub*sampling_rate
 
 path_save="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/idx_dtt.npz"
 if isfile(path=path_save):
