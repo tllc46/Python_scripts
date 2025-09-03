@@ -85,7 +85,7 @@ choice_single=np.ones(shape=nsta,dtype=bool)
 for i in mdl_b.exclude_single:
     idx_stnm=df[df["stnm"]==i].index[0]
     choice_single[idx_stnm]=False
-choice_pair=(choice_single[:,None] & choice_single)[idx_triu]
+choice_pair=(choice_single[:,None] & choice_single)[idx_triu] #(ntriu,)
 for i in mdl_b.exclude_pair:
     idx_pair=stnm_pairs.index(i)
     choice_pair[idx_pair]=False
