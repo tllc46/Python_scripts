@@ -29,13 +29,6 @@ sec_day=86400 #[s]
 #sampling rate
 sampling_rate=100 #[Hz]
 
-#sub window
-len_sub=48 #[s]
-half_sub=len_sub//2
-npts_sub=len_sub*sampling_rate
-npts_half_sub=npts_sub//2
-lag=np.arange(start=-npts_half_sub,stop=npts_half_sub)/sampling_rate
-
 #average window
 shift_avg=mdl_t.shift_avg
 offset_avg=mdl_t.offset_avg
@@ -63,6 +56,12 @@ idx_dtt=idx_dtt["idx_dtt"] #(ntriu,nnode)
 #cross correlation
 xcorr=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/xcorr/"+sys.argv[2]+"."+mdl_t.name+".npz")
 xcorr=xcorr["xcorr"][idx_avg] #(ntriu,npts_sub)
+npts_sub=xcorr.shape[1]
+
+#sub window
+len_sub=npts_sub//sampling_rate
+half_sub=len_sub//2
+lag=np.arange(start=-(npts_sub//2),stop=npts_sub//2)/sampling_rate
 
 #location
 loc=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/loc/"+sys.argv[2]+"."+sys.argv[3]+"."+sys.argv[4]+"."+mdl_t.name+".npz")
@@ -135,7 +134,7 @@ def plot_xcf(idx_loc,ax):
         if np.isnan(xcorr[i,0]) or not choice_pair[i]:
             continue
 
-        idx_shift_dtt=idx_dtt[i,idx_node]-npts_half_sub
+        idx_shift_dtt=idx_dtt[i,idx_node]
         if 0<idx_shift_dtt:
             beam[:-idx_shift_dtt]+=xcorr[i,idx_shift_dtt:]
         elif idx_shift_dtt<0:
