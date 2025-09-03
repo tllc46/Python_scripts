@@ -30,10 +30,6 @@ sec_day=86400 #[s]
 #sampling rate
 sampling_rate=100 #[Hz]
 
-#sub window
-len_sub=48 #[s]
-npts_sub=len_sub*sampling_rate
-
 #average window
 shift_avg=mdl_t.shift_avg
 offset_avg=mdl_t.offset_avg
@@ -61,13 +57,15 @@ res_inv=vel["res_inv"] #(lon,lat,dep)
 num=vel["num"] #(lon,lat,dep)
 nnode=np.prod(a=num)
 
-#travel time difference
-idx_dtt=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/idx_dtt.npz")
-idx_dtt=idx_dtt["idx_dtt"] #(ntriu,nnode)
-
 #cross correlation
 xcorr=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/xcorr/"+sys.argv[2]+"."+mdl_t.name+".npz")
 xcorr=xcorr["xcorr"][idx_avg] #(ntriu,npts_sub)
+npts_sub=xcorr.shape[1]
+
+#travel time difference
+idx_dtt=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/idx_dtt.npz")
+idx_dtt=idx_dtt["idx_dtt"] #(ntriu,nnode)
+idx_dtt+=npts_sub//2
 
 #station
 df=pd.read_csv(filepath_or_buffer=mdl_x.info_sta,sep=" ",names=["stnm","stla","stlo","stel"])
