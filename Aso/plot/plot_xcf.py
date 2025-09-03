@@ -71,6 +71,7 @@ idx_loc=loc["idx_loc"][:,idx_avg] #(3,)
 #station
 df=pd.read_csv(filepath_or_buffer=mdl_x.info_sta,sep=" ",names=["stnm","stla","stlo","stel"])
 nsta=len(df)
+idx_triu=np.triu_indices(n=nsta,k=1)
 stnm_pairs=[]
 for i in range(nsta):
     for j in range(i+1,nsta):
@@ -78,10 +79,14 @@ for i in range(nsta):
 ntriu=nsta*(nsta-1)//2
 
 #station pair choice
-choice=np.ones(shape=ntriu,dtype=bool)
-for i in mdl_b.exclude:
+choice_single=np.ones(shape=nsta,dtype=bool)
+for i in mdl_b.exclude_single:
+    idx_stnm=df[df["stnm"]==i].index[0]
+    choice_single[idx_stnm]=False
+choice_pair=(choice_single[:,None] & choice_single)[idx_triu] #(ntriu,)
+for i in mdl_b.exclude_pair:
     idx_pair=stnm_pairs.index(i)
-    choice[idx_pair]=False
+    choice_pair[idx_pair]=False
 
 #bandpass filter
 if bool_fltr:
@@ -101,7 +106,7 @@ if isfile(path=path_save):
 
 nstack=0
 for i in range(ntriu):
-    if np.isnan(xcorr[i,0]) or not choice[i]:
+    if np.isnan(xcorr[i,0]) or not choice_pair[i]:
         continue
 
     if bool_fltr:
@@ -127,7 +132,7 @@ def plot_xcf(idx_loc,ax):
 
     j=0
     for i in range(ntriu):
-        if np.isnan(xcorr[i,0]) or not choice[i]:
+        if np.isnan(xcorr[i,0]) or not choice_pair[i]:
             continue
 
         idx_shift_dtt=idx_dtt[i,idx_node]-npts_half_sub
