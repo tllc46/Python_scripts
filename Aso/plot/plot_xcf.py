@@ -27,10 +27,10 @@ mdl_b=import_module(name=sys.argv[4])
 sec_day=86400 #[s]
 
 #sampling rate
-sampling_rate=100
+sampling_rate=100 #[Hz]
 
 #sub window
-len_sub=48
+len_sub=48 #[s]
 half_sub=len_sub//2
 npts_sub=len_sub*sampling_rate
 npts_half_sub=npts_sub//2
