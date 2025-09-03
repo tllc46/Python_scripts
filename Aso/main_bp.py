@@ -21,24 +21,22 @@ mdl_b=import_module(name=sys.argv[4])
 #sampling rate
 sampling_rate=100 #[Hz]
 
-#sub window
-len_sub=48 #[s]
-npts_sub=len_sub*sampling_rate
-
 #velocity
 vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/vel.npz")
 idx_flat=vel["idx"].flatten() #(lon,lat,dep) → (nnode,)
 num=vel["num"] #(lon,lat,dep)
 nnode=np.prod(a=num)
 
-#travel time difference
-idx_dtt=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/idx_dtt.npz")
-idx_dtt=idx_dtt["idx_dtt"] #(ntriu,nnode)
-
 #cross correlation
 xcorr=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/xcorr/"+sys.argv[2]+"."+sys.argv[5]+".npz")
 xcorr=xcorr["xcorr"] #(navg,ntriu,npts_sub)
 navg=xcorr.shape[0]
+npts_sub=xcorr.shape[2]
+
+#travel time difference
+idx_dtt=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/idx_dtt.npz")
+idx_dtt=idx_dtt["idx_dtt"] #(ntriu,nnode)
+idx_dtt+=npts_sub//2
 
 #station
 df=pd.read_csv(filepath_or_buffer=mdl_x.info_sta,sep=" ",names=["stnm","stla","stlo","stel"])
