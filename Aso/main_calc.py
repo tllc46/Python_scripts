@@ -41,14 +41,14 @@ else:
     sampling_rate=sampling_rate_0 #[Hz]
 
 #sub window
-len_sub=48 #[s]
+len_sub=mdl_p.len_sub
 shift_sub=len_sub//2
 npts_shift_sub=shift_sub*sampling_rate
 ovrlp_sub=shift_sub
 npts_sub=len_sub*sampling_rate
 
 #average window
-nsub_avg=100
+nsub_avg=mdl_p.nsub_avg
 len_avg=shift_sub*nsub_avg+ovrlp_sub
 npts_avg=len_avg*sampling_rate
 npts_avg_0=len_avg*sampling_rate_0
@@ -113,7 +113,7 @@ def bandpass():
 
 #average window frequency normalization (whiten)
 method_avg_fn=mdl_p.method_avg_fn
-len_fn_savgol=11
+len_fn_savgol=mdl_p.len_fn_savgol
 if method_avg_fn:
     win_size=mdl_p.win_dur_fn*sampling_rate
     win=hann(M=win_size,sym=False)
