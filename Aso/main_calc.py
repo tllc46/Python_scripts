@@ -259,7 +259,7 @@ def calc_cohrnc():
     elif method_cohrnc=="avg":
         cov_avg_diag[:,:nsta_avg]=np.real(val=np.diagonal(a=cov_avg[:,:nsta_avg,:nsta_avg],axis1=1,axis2=2))
         cov_avg[:,:nsta_avg,:nsta_avg]/=np.sqrt(cov_avg_diag[:,:nsta_avg,None]*cov_avg_diag[:,None,:nsta_avg])
-        cohrnc[:,idx_avg]=np.mean(a=abs(cov_avg[:,idx_triu_avg[0],idx_triu_avg[1]]),axis=1)
+        cohrnc[:,idx_avg]=np.nanmean(a=abs(cov_avg[:,idx_triu_avg[0],idx_triu_avg[1]]),axis=1)
     elif method_cohrnc=="eig":
         eig_val[:,:nsta_avg]=eigvalsh(a=cov_avg[:,:nsta_avg,:nsta_avg])
         cohrnc[:,idx_avg]=np.sum(a=np.arange(start=nsta_avg-1,stop=-1,step=-1)*eig_val[:,:nsta_avg],axis=1)
