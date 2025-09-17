@@ -105,11 +105,10 @@ def calculate_psd():
     st1=read_stream(date=start_1d)
     for i in range(n_day):
         print(start_1d.strftime(format="%Y-%m-%d"),"| starting...",file=stderr)
-        day_idx=i*n_seg_1d
         st2=read_stream(date=start_1d+sec_1d)
         if not st1:
             print(start_1d.strftime(format="%Y-%m-%d"),"| no data",file=stderr)
-            psd_values[day_idx:day_idx+n_seg_1d]=-999999
+            psd_values[i*n_seg_1d:(i+1)*n_seg_1d,:]=-999999
             next_day()
             continue
 
@@ -121,19 +120,19 @@ def calculate_psd():
         print(start_1d.strftime(format="%Y-%m-%d"),"| main processing...",file=stderr)
         for j in range(n_seg_1d):
             start_seg=start_1d+j*step
-            seg_idx=day_idx+j
+            seg_idx=i*n_seg_1d+j
             st_seg=st1.slice(starttime=start_seg,endtime=start_seg+ppsd_length-delta) #original code: slice
 
             if not st_seg:
                 print(start_1d.strftime(format="%Y-%m-%d"),f"| {j+1:02}/{n_seg_1d} segment | no data",file=stderr)
-                psd_values[seg_idx]=-999999
+                psd_values[seg_idx,:]=-999999
                 continue
 
             tr=st_seg[0]
 
             if len(tr.data)<seg_len or type(tr.data)==ma.MaskedArray and tr.data.count()<seg_len:
                 print(start_1d.strftime(format="%Y-%m-%d"),f"| {j+1:02}/{n_seg_1d} segment | gap exists",file=stderr)
-                psd_values[seg_idx]=-999999
+                psd_values[seg_idx,:]=-999999
                 continue
 
             result=SFT.stft_detrend(x=tr.data,detr="linear",p0=p_lb,p1=p_ub)[1:]
