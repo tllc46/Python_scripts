@@ -168,7 +168,7 @@ def read_cur():
 
     for i in range(nsta):
         stnm=df.loc[i,"stnm"]
-        path="/home/tllc46/48NAS1/tllc46/Aso_data/seismograms/"+udt_cur.strftime(format="%Y.%j")+"/"+stnm+".SAC"
+        path="/home/tllc46/48NAS1/tllc46/Aso_data/"+udt_cur.strftime(format="%Y.%j")+"/"+stnm+".SAC"
         if isfile(path=path):
             st_cur+=read(pathname_or_url=path,format="SAC",byteorder="little")
 def read_next():
@@ -176,7 +176,7 @@ def read_next():
 
     for i in range(nsta):
         stnm=df.loc[i,"stnm"]
-        path="/home/tllc46/48NAS1/tllc46/Aso_data/seismograms/"+udt_next.strftime(format="%Y.%j")+"/"+stnm+".SAC"
+        path="/home/tllc46/48NAS1/tllc46/Aso_data/"+udt_next.strftime(format="%Y.%j")+"/"+stnm+".SAC"
         if isfile(path=path):
             st_next+=read(pathname_or_url=path,format="SAC",byteorder="little")
 
