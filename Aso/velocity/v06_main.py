@@ -16,9 +16,9 @@ path_save="/home/tllc46/48NAS1/tllc46/Aso/vel/v06"
 if not isdir(path_save):
     makedirs(name=path_save)
 path_save+="/vel.npz"
-#if isfile(path=path_save):
-#    print("data already exists")
-#    exit()
+if isfile(path=path_save):
+    print("data already exists")
+    exit()
 
 topo=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/topo/Aso_topo_10m.npz")
 topo=topo["topo"] #(6000,6750)=(lat_topo,lon_topo) [m]
