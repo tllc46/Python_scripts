@@ -1,6 +1,6 @@
 #usage
-#v01_main.py → calc_tt.py → vel_reduce.py → calc_dtt.py
-#python calc_tt.py v01 8
+#v01_main.py → set_grid.py → calc_tt.py → calc_dtt.py
+#python calc_tt.py v06 1
 
 import sys
 from os.path import isfile
@@ -21,15 +21,18 @@ if isfile(path=path_save):
     print("data already exists")
     exit()
 
-vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/vel_orig.npz")
+vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/vel.npz")
 lon=vel["lon"]
 lat=vel["lat"]
 dep=vel["dep"]
 res=vel["res"] #(lon,lat,dep)
 num=vel["num"] #(lon,lat,dep)
-idx_lon=vel["idx_lon"]
-idx_lat=vel["idx_lat"]
 vel=vel["vel"] #(lon,lat,dep)
+
+grid=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/grid.npz")
+idx_lon=grid["idx_lon"]
+idx_lat=grid["idx_lat"]
+idx_dep=grid["idx_dep"]
 
 travel_times=np.empty(shape=num) #(lon,lat,dep)
 
@@ -75,7 +78,6 @@ if not success:
     exit()
 
 travel_times[:,:,:]=np.flip(m=np.flip(m=np.swapaxes(a=solver.traveltime.values,axis1=0,axis2=2),axis=2),axis=1) #(increasing lon,increasing lat,increasing dep)
-travel_times=travel_times[idx_lon[0]:idx_lon[1],idx_lat[0]:idx_lat[1]]
-travel_times[np.isinf(travel_times)]=0
+travel_times=travel_times[idx_lon[0]:idx_lon[1]:idx_lon[2],idx_lat[0]:idx_lat[1]:idx_lat[2],idx_dep[0]:idx_dep[1]:idx_dep[2]]
 print(stnm,np.sum(a=travel_times))
-np.savez(file=path_save,travel_times=travel_times.flatten())
+np.savez(file=path_save,travel_times=travel_times)
