@@ -1,5 +1,5 @@
 #usage
-#v01_main.py → set_grid.py → calc_tt.py → calc_dtt.py
+#v06_main.py → set_grid.py → calc_tt.py → calc_dtt.py
 #python calc_tt.py v06 1
 
 import sys
