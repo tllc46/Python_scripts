@@ -1,6 +1,6 @@
 #usage
-#v01_main.py → calc_tt.py → vel_reduce.py → calc_dtt.py
-#python calc_dtt.py v01
+#v06_main.py → set_grid.py → calc_tt.py → calc_dtt.py
+#python calc_dtt.py v06
 
 import sys
 from os.path import isfile
@@ -19,8 +19,8 @@ df=pd.read_csv(filepath_or_buffer="center",sep=" ",names=["stnm","stla","stlo","
 nsta=len(df)
 ntriu=nsta*(nsta-1)//2
 
-vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/vel.npz")
-num=vel["num"] #(lon,lat,dep)
+grid=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/grid.npz")
+num=grid["num"] #(lon,lat,dep)
 nnode=np.prod(a=num)
 
 travel_times=np.empty(shape=(nsta,nnode))
@@ -29,8 +29,8 @@ idx_dtt=np.empty(shape=(ntriu,nnode),dtype=int)
 
 for i in range(nsta):
     stnm=df.loc[i,"stnm"]
-    travel_times_flat=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/"+stnm+".npz")
-    travel_times[i,:]=travel_times_flat["travel_times"] #(nnode,)
+    travel_times_flat=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/"+stnm+".npz") #(lon,lat,dep)
+    travel_times[i,:]=travel_times_flat["travel_times"].flatten() #(nnode,)
 
 for i in range(nsta):
     for j in range(i+1,nsta):
