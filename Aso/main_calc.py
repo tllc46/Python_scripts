@@ -69,7 +69,7 @@ mdl_t.init(str_date=sys.argv[3])
 udt_cur=mdl_t.udt_cur
 nday=mdl_t.nday
 udt_next=udt_cur+sec_day
-navg=navg_day*nday
+navg=mdl_t.navg
 
 #frequency
 if calc_type=="cohrnc":
