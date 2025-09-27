@@ -331,7 +331,7 @@ def st2data_order():
         else:
             data_avg[idx_order[i],:]=tr.data
 
-def calc_day():
+def calc_day(idx_day):
     global idx_avg,st_avg,idx_triu_avg,idx_flat_avg
 
     for i in range(navg_day):
@@ -360,12 +360,12 @@ def calc_day():
         print_status()
 
 def main_day():
-    global idx_day,udt_cur
+    global udt_cur
 
     for idx_day in range(nday):
         read_cur()
 
-        calc_day()
+        calc_day(idx_day=idx_day)
         st_cur.traces.clear()
         udt_cur+=sec_day
 
@@ -376,7 +376,7 @@ def main_day():
     file.close()
 
 def main_conti():
-    global idx_day,st_cur,udt_cur,udt_next
+    global st_cur,udt_cur,udt_next
 
     read_cur()
     for idx_day in range(nday):
@@ -384,7 +384,7 @@ def main_conti():
         st_cur+=st_next.slice(endtime=udt_next+ovrlp_avg-delta)
         st_cur.merge(method=1)
 
-        calc_day()
+        calc_day(idx_day=idx_day)
         st_cur.traces.clear()
         st_cur+=st_next
         st_next.traces.clear()
