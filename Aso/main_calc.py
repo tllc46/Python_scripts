@@ -357,7 +357,7 @@ def calc_day(idx_day):
             calc_cohrnc(idx_avg=idx_avg)
         elif calc_type=="xcorr":
             calc_xcorr(idx_avg=idx_avg)
-        print_status()
+        print_status(idx_avg=idx_avg)
 
 def main_day():
     global udt_cur
