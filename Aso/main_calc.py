@@ -217,7 +217,7 @@ if bool_deci:
 if not isdir("logs"):
     makedirs(name="logs")
 file=open(file="logs/"+sys.argv[2]+"."+sys.argv[3],mode="w",buffering=1)
-def print_status():
+def print_status(idx_avg):
     now=datetime.now()
     now_str=now.strftime(format="[%m-%dT%H:%M:%S]")
     file.write(now_str+f" {idx_avg+1:03}/{navg} done\n")
@@ -252,7 +252,7 @@ def calc_cov():
     else:
         cov_avg[:,:nsta_avg,:nsta_avg]=np.einsum("ift,jft->fij",spctr_sub[:nsta_avg],np.conj(spctr_sub[:nsta_avg]))/nsub_avg
 
-def calc_cohrnc():
+def calc_cohrnc(idx_avg):
     if method_cohrnc=="simple":
         cov_sub[:nsta_avg,:nsta_avg,:,:]=np.exp(1j*np.angle(z=cov_sub[:nsta_avg,:nsta_avg]))
         cohrnc[:,idx_avg]=np.mean(a=abs(np.mean(a=cov_sub[idx_triu_avg],axis=2)),axis=0)
@@ -265,7 +265,7 @@ def calc_cohrnc():
         cohrnc[:,idx_avg]=np.sum(a=np.arange(start=nsta_avg-1,stop=-1,step=-1)*eig_val[:,:nsta_avg],axis=1)
         cohrnc[:,idx_avg]/=np.sum(a=eig_val[:,:nsta_avg],axis=1)
 
-def calc_xcorr():
+def calc_xcorr(idx_avg):
     if method_xcorr=="default":
         cov_avg_diag[:,:nsta_avg]=np.real(val=np.diagonal(a=cov_avg[:,:nsta_avg,:nsta_avg],axis1=1,axis2=2))
         denom[:nsta_avg]=2*np.sum(a=cov_avg_diag[1:-1,:nsta_avg],axis=0)
@@ -332,7 +332,7 @@ def st2data_order():
             data_avg[idx_order[i],:]=tr.data
 
 def calc_day(idx_day):
-    global idx_avg,st_avg,idx_triu_avg,idx_flat_avg
+    global st_avg,idx_triu_avg,idx_flat_avg
 
     for i in range(navg_day):
         if calc_type=="xcorr":
@@ -354,9 +354,9 @@ def calc_day(idx_day):
         pre_proc()
         calc_cov()
         if calc_type=="cohrnc":
-            calc_cohrnc()
+            calc_cohrnc(idx_avg=idx_avg)
         elif calc_type=="xcorr":
-            calc_xcorr()
+            calc_xcorr(idx_avg=idx_avg)
         print_status()
 
 def main_day():
