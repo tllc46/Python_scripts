@@ -55,9 +55,6 @@ npts_avg_0=len_avg*sampling_rate_0
 shift_avg=mdl_t.shift_avg
 offset_avg=mdl_t.offset_avg
 navg_day=mdl_t.navg_day
-if sec_day<=offset_avg+shift_avg*(navg_day-1):
-    print("average window exists outside one day")
-    exit()
 if sec_day<offset_avg+shift_avg*(navg_day-1)+len_avg:
     st_step="conti"
     ovrlp_avg=(offset_avg+shift_avg*(navg_day-1)+len_avg)-sec_day
