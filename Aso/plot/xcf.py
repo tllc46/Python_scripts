@@ -5,7 +5,7 @@ import sys
 from os import makedirs
 from os.path import isdir,isfile
 from importlib import import_module
-from datetime import datetime,timedelta
+from datetime import datetime
 
 import numpy as np
 from scipy.signal import butter,sosfilt,hilbert
@@ -16,56 +16,46 @@ import pandas as pd
 bool_fltr=False
 
 sys.path.append("/home/tllc46/Aso/tstep")
-sys.path.append("/home/tllc46/Aso/xcorr")
-sys.path.append("/home/tllc46/Aso/bp")
+sys.path.append("/home/tllc46/Aso/xcorr/params")
+sys.path.append("/home/tllc46/Aso/bp_ext")
 
-mdl_t=import_module(name=sys.argv[1])
+tstep=int(sys.argv[1][1:])+1
+tstep=f"t{tstep:02}"
+
+mdl_t_x=import_module(name=sys.argv[1])
+mdl_t_l=import_module(name=tstep)
 mdl_x=import_module(name=sys.argv[2])
 mdl_b=import_module(name=sys.argv[4])
-
-#constant
-sec_day=86400 #[s]
 
 #sampling rate
 sampling_rate=100 #[Hz]
 
 #average window
-shift_avg=mdl_t.shift_avg
-offset_avg=mdl_t.offset_avg
 dt=datetime.strptime(sys.argv[5],"%Y-%m-%dT%H:%M:%S")
-dt_start_avg=datetime(year=dt.year,month=dt.month,day=dt.day)+timedelta(seconds=offset_avg)
-if dt<dt_start_avg:
-    print("time is before the average window offset")
-    exit()
-start_avg=(dt-dt_start_avg).seconds
-if start_avg%shift_avg:
-    print("time matching average window doesn't exist")
-    exit()
-navg_day=sec_day//shift_avg
-mdl_t.parse_dt(dt=dt)
-idx_avg=(dt-mdl_t.dt_name).days*navg_day+start_avg//shift_avg
+mdl_t_x.parse_dt(dt=dt)
+mdl_t_l.parse_dt(dt=dt)
 
-#velocity
-vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/vel.npz")
-num=vel["num"] #(lon,lat,dep)
+#velocity grid
+grid=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/grid.npz")
+num=grid["num"] #(lon,lat,dep)
+
+#cross correlation
+xcorr=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/xcorr/"+sys.argv[2]+"."+mdl_t_x.name+".npz")
+xcorr=xcorr["xcorr"][mdl_t_x.idx_avg] #(ntriu,npts_sub)
+npts_sub=xcorr.shape[1]
 
 #travel time difference
 idx_dtt=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/idx_dtt.npz")
 idx_dtt=idx_dtt["idx_dtt"] #(ntriu,nnode)
 
-#cross correlation
-xcorr=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/xcorr/"+sys.argv[2]+"."+mdl_t.name+".npz")
-xcorr=xcorr["xcorr"][idx_avg] #(ntriu,npts_sub)
-npts_sub=xcorr.shape[1]
-
 #sub window
 len_sub=npts_sub//sampling_rate
-half_sub=len_sub//2
 lag=np.arange(start=-(npts_sub//2),stop=npts_sub//2)/sampling_rate
+lag_max=15 #[s]
 
 #location
-loc=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/loc/"+sys.argv[2]+"."+sys.argv[3]+"."+sys.argv[4]+"."+mdl_t.name+".npz")
-idx_loc=loc["idx_loc"][:,idx_avg] #(3,)
+loc=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+tstep+"/loc/"+sys.argv[2]+"."+sys.argv[3]+"."+sys.argv[4]+"."+mdl_t_l.name+".npz")
+idx_loc=loc["idx_loc"][:,mdl_t_l.idx_avg] #(3,)
 
 #station
 df=pd.read_csv(filepath_or_buffer=mdl_x.info_sta,sep=" ",names=["stnm","stla","stlo","stel"])
@@ -92,6 +82,7 @@ if bool_fltr:
     sos_butter=butter(N=4,Wn=[3,6],btype="band",fs=sampling_rate,output="sos")
 
 #array
+xcorr_original=np.copy(a=xcorr)
 beam=np.empty(shape=npts_sub)
 
 #saving directory
@@ -99,9 +90,6 @@ path_save="/home/tllc46/48NAS1/tllc46/Aso/figs/xcf"
 if not isdir(path_save):
     makedirs(name=path_save)
 path_save+="/"+sys.argv[2]+"."+sys.argv[3]+"."+sys.argv[4]+"."+dt.strftime(format="%Y-%m-%dT%H%M%S")+".png"
-if isfile(path=path_save):
-    print("figure already exists")
-    exit()
 
 nstack=0
 for i in range(ntriu):
@@ -115,19 +103,24 @@ for i in range(ntriu):
     xcorr[i,:]=gaussian_filter1d(input=xcorr[i],sigma=mdl_b.sigma)
     if mdl_b.normalize:
         xcorr[i,:]/=max(xcorr[i])
+        xcorr_original[i,:]/=max(abs(xcorr_original[i]))
     else:
         if not nstack:
             norm=max(xcorr[i])
+            norm_original=max(abs(xcorr_original[i]))
         xcorr[i,:]/=norm
+        xcorr_original[i,:]/=norm_original
 
     nstack+=1
+
+#figure
+scale=0.65
 
 def plot_xcf(idx_loc,ax):
     global beam
 
     idx_node=np.ravel_multi_index(multi_index=idx_loc,dims=num)
     beam[:]=0
-    ax.axvline(x=0,color="red")
 
     j=0
     for i in range(ntriu):
@@ -142,28 +135,30 @@ def plot_xcf(idx_loc,ax):
         else: #idx_shift_dtt==0
             beam+=xcorr[i]
 
-        ax.plot(lag-idx_shift_dtt/sampling_rate,j+0.75*xcorr[i],color="black")
-        ax.annotate(text=stnm_pairs[i],xy=(-half_sub,j),xytext=(0,5),textcoords="offset points")
+        ax.plot(lag-idx_shift_dtt/sampling_rate,j+scale*xcorr_original[i],color="blue")
+        ax.plot(lag-idx_shift_dtt/sampling_rate,j+scale*xcorr[i],color="black")
+        ax.annotate(text=stnm_pairs[i],xy=(-lag_max,j),xytext=(1,5),textcoords="offset points")
 
         j+=1
 
     beam/=nstack
-    ax.plot(lag,j+beam,color="red")
+    ax.plot(lag,j+scale*beam,color="red")
+    ax.axvline(x=0,color="red")
 
     ax.grid(visible=True,axis="x")
-    ax.set_xlim(left=-half_sub,right=half_sub)
+    ax.set_xlim(left=-lag_max,right=lag_max)
     ax.set_xlabel(xlabel="lag time (s)")
     ax.set_yticks(ticks=[])
-    ax.set_ylim(bottom=-1,top=nstack+2)
+    ax.set_ylim(bottom=-1,top=nstack+1)
 
 def main():
-    fig=plt.figure(figsize=(10,14.4))
-    fig.set_layout_engine(layout="constrained")
+    #fig=plt.figure(figsize=(8.27,11.69),layout="constrained")
+    fig=plt.figure(figsize=(25.6,14.4),layout="constrained")
     axes=fig.subplots(ncols=2)
 
     plot_xcf(idx_loc=idx_loc,ax=axes[0])
+    plot_xcf(idx_loc=[123,120,23],ax=axes[1])
 
-    fig.suptitle(t=sys.argv[2]+"."+sys.argv[3]+"."+sys.argv[4]+"."+sys.argv[5])
     fig.savefig(fname=path_save)
 
 main()
