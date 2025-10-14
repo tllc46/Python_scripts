@@ -17,6 +17,7 @@ import pandas as pd
 from obspy import Stream,read
 
 sys.path.append("/home/tllc46/Aso/tstep")
+sys.path.append("/home/tllc46/Aso/xcorr/params")
 
 mdl_t=import_module(name=sys.argv[1])
 mdl_p=import_module(name=sys.argv[2])
