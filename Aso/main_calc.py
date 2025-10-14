@@ -1,5 +1,5 @@
 #usage
-#python main_calc.py t01 x01 2014
+#python main_calc.py t05 x195 2014-11-01
 
 import sys
 from os import makedirs
