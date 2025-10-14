@@ -103,7 +103,7 @@ def spgm(ax,fig,**kwargs):
         spgm=np.hstack(tup=(spgm,spgm_unit))
     spgm=spgm[:,mdl_t.idx_start:mdl_t.idx_start+navg]
 
-    quadmesh=ax.pcolormesh(mdl_t.ndt_range,frequency,spgm,norm="log",cmap="rainbow",vmin=1e4,vmax=1e6,shading="nearest")
+    quadmesh=ax.pcolormesh(mdl_t.ndt_range,frequency,spgm,norm="log",cmap="rainbow",vmin=1e4,vmax=1e6)
     ax.axhline(y=3,color="black",linestyle="dashed")
     ax.axhline(y=6,color="black",linestyle="dashed")
 
