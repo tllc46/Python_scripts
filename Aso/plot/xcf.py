@@ -17,7 +17,7 @@ bool_fltr=False
 
 sys.path.append("/home/tllc46/Aso/tstep")
 sys.path.append("/home/tllc46/Aso/xcorr/params")
-sys.path.append("/home/tllc46/Aso/bp_ext")
+sys.path.append("/home/tllc46/Aso/bp/params")
 
 tstep=int(sys.argv[1][1:])+1
 tstep=f"t{tstep:02}"
