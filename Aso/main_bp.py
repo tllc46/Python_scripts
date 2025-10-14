@@ -14,7 +14,7 @@ import pandas as pd
 bool_fltr=False
 
 sys.path.append("/home/tllc46/Aso/tstep")
-sys.path.append("/home/tllc46/Aso/xcorr_ext2/params")
+sys.path.append("/home/tllc46/Aso/xcorr/params")
 sys.path.append("/home/tllc46/Aso/bp/params")
 
 mdl_t=import_module(name=sys.argv[1])
