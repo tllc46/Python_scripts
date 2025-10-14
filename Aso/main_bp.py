@@ -1,5 +1,5 @@
 #usage
-#python main_bp.py t01 x01 v01 b01 2014-11
+#python main_bp.py t06 x195 v06 b03 2014-11
 
 import sys
 from os import makedirs
