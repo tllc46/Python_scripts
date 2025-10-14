@@ -79,7 +79,7 @@ def cohrnc_mean(ax,**kwargs):
     cohrnc=cohrnc[:,mdl_t_avg.idx_start:mdl_t_avg.idx_start+navg]
     cohrnc_mean=np.mean(a=cohrnc,axis=0)
 
-    ax.plot(mdl_t_avg.ndt_range,cohrnc_mean,color="black",**kwargs)
+    ax.plot(mdl_t_avg.ndt_range,cohrnc_mean,**kwargs)
 
     ax.set_ylabel(ylabel="mean coherence\n(3-6Hz)")
 
