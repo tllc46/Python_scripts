@@ -1,5 +1,5 @@
 #usage
-#python main_bp.py t01 x01 v01 b01 2014
+#python main_bp.py t01 x01 v01 b01 2014-11
 
 import sys
 from os import makedirs
@@ -13,24 +13,34 @@ import pandas as pd
 
 bool_fltr=False
 
-sys.path.append("/home/tllc46/Aso/xcorr")
+sys.path.append("/home/tllc46/Aso/tstep")
+sys.path.append("/home/tllc46/Aso/xcorr_ext2/params")
+sys.path.append("/home/tllc46/Aso/bp/params")
 
+mdl_t=import_module(name=sys.argv[1])
 mdl_x=import_module(name=sys.argv[2])
 mdl_b=import_module(name=sys.argv[4])
 
 #sampling rate
 sampling_rate=100 #[Hz]
 
-#velocity
-vel=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/vel.npz")
-idx_flat=vel["idx"].flatten() #(lon,lat,dep) → (nnode,)
-num=vel["num"] #(lon,lat,dep)
+#velocity grid
+grid=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/grid.npz")
+idx_flat=grid["idx"].flatten() #(lon,lat,dep) → (nnode,)
+num=grid["num"] #(lon,lat,dep)
 nnode=np.prod(a=num)
+nnode_eff=sum(idx_flat)
+
+#day
+mdl_t.init(str_date=sys.argv[5])
+navg=mdl_t.navg
+idx_avg=0
 
 #cross correlation
-xcorr=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/xcorr/"+sys.argv[2]+"."+sys.argv[5]+".npz")
-xcorr=xcorr["xcorr"] #(navg,ntriu,npts_sub)
-navg=xcorr.shape[0]
+tstep=int(sys.argv[1][1:])-1
+tstep=f"t{tstep:02}"
+xcorr=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+tstep+"/xcorr/"+sys.argv[2]+"."+sys.argv[5]+"-01.npz") #read only first cross correlation to inspect npts_sub
+xcorr=xcorr["xcorr"] #(navg_unit,ntriu,npts_sub)
 npts_sub=xcorr.shape[2]
 
 #travel time difference
@@ -66,7 +76,8 @@ if bool_fltr:
 xcorr_pair=np.empty(shape=npts_sub)
 beam=np.empty(shape=nnode)
 idx_loc=np.empty(shape=(3,navg),dtype=int)
-beam_max=np.empty(shape=navg)
+percentage=np.empty(shape=navg)
+nrf=np.empty(shape=navg)
 
 #saving directory
 path_save="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/loc"
@@ -77,13 +88,13 @@ if isfile(path=path_save):
     print("data already exists")
     exit()
 
-def beamform():
+def beamform(idx_avg_unit):
     global xcorr_pair,beam
     nstack=0
     beam[:]=0
 
     for i in range(ntriu):
-        xcorr_pair[:]=xcorr[idx_avg,i]
+        xcorr_pair[:]=xcorr[idx_avg_unit,i]
         if np.isnan(xcorr_pair[0]) or not choice_pair[i]:
             continue
 
@@ -98,18 +109,33 @@ def beamform():
         beam+=xcorr_pair[idx_dtt[i]]
         nstack+=1
 
-    beam[~idx_flat]=np.nan
+    beam[~idx_flat]=0
     beam/=nstack
-    idx_max=np.nanargmax(a=beam)
-    beam_max[idx_avg]=beam[idx_max]
+    idx_max=np.argmax(a=beam)
+    beam/=beam[idx_max]
     idx_loc[:,idx_avg]=np.unravel_index(indices=idx_max,shape=num)
+    percentage[idx_avg]=np.sum(a=0.98<=beam)/nnode_eff
+    nrf[idx_avg]=1/sum(beam)
 
-def main():
+def calc_unit(navg_unit):
     global idx_avg
 
-    for idx_avg in range(navg):
-        beamform()
+    for idx_avg_unit in range(navg_unit):
+        beamform(idx_avg_unit=idx_avg_unit)
+        idx_avg+=1
 
-    np.savez(file=path_save,idx_loc=idx_loc,beam_max=beam_max)
+def main():
+    global xcorr
+
+    for i in range(1,31,3):
+        if i!=1: #already read first cross correlation
+            xcorr=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/"+tstep+"/xcorr/"+sys.argv[2]+"."+sys.argv[5]+f"-{i:02}.npz")
+            xcorr=xcorr["xcorr"] #(navg_unit,ntriu,npts_sub)
+
+        navg_unit=xcorr.shape[0]
+
+        calc_unit(navg_unit=navg_unit)
+
+    np.savez(file=path_save,idx_loc=idx_loc,percentage=percentage,nrf=nrf)
 
 main()
