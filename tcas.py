@@ -17,7 +17,7 @@ dtcmax=0.5 #최대 time shift
 def pstack():
     zssl[:]=0
     zscp[:]=0
-    lmn=np.round((-dtmo+dtcs)/sampin).astype(dtype=int)
+    lmn=np.rint((-dtmo+dtcs)/sampin).astype(dtype=int)
 
     for i in range(nsta):
         zssl[:]+=st[i].data[nstkwb-lmn[i]-1:nstkwb+nstkwl-lmn[i]]
@@ -49,7 +49,7 @@ dtcs=np.zeros(shape=nsta) #1회 stack으로 결정된 time shift
 
 pstack() #초기 stack
 
-imo=np.round(dtmo/sampin).astype(dtype=int)
+imo=np.rint(dtmo/sampin).astype(dtype=int)
 jim1=round(dtcmin/sampin)
 jim2=round(dtcmax/sampin)
 wsp=np.empty(shape=jim2-jim1+1) #time shift 탐색 구간에서 Lp norm
