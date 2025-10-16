@@ -20,7 +20,7 @@ def vesp(slow):
 
     #time shift 계산
     timeshift=get_timeshift(geometry=geometry,sll_x=sx,sll_y=sy,sl_s=0,grdpts_x=1,grdpts_y=1).squeeze()
-    timeshift=delta*np.round(timeshift/delta).astype(dtype=int)
+    timeshift=delta*np.rint(timeshift/delta).astype(dtype=int)
 
     st_stack=st.copy()
 
