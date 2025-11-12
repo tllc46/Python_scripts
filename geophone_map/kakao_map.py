@@ -39,16 +39,16 @@ for key,value in symbol_map.items():
     elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[5]/div[5]/div/button[1]")))
     elem.click()
     #표식 설정
-    elem=driver.find_element(by=By.XPATH,value="/html/body/div[20]/div[4]/form/fieldset/div[2]/div[1]/button")
+    elem=driver.find_element(by=By.XPATH,value="/html/body/div[18]/div[4]/form/fieldset/div[2]/div[1]/button")
     elem.click()
     #표식 결정
-    elem=driver.find_element(by=By.XPATH,value=f"/html/body/div[20]/div[4]/form/fieldset/div[2]/div[1]/ul/li[{value}]/a")
+    elem=driver.find_element(by=By.XPATH,value=f"/html/body/div[18]/div[4]/form/fieldset/div[2]/div[1]/ul/li[{value}]/a")
     elem.click()
     #"그룹명을 입력하세요."
-    elem=driver.find_element(by=By.XPATH,value="/html/body/div[20]/div[4]/form/fieldset/div[2]/dl[2]/dd/div/input")
+    elem=driver.find_element(by=By.XPATH,value="/html/body/div[18]/div[4]/form/fieldset/div[2]/dl[2]/dd/div/input")
     elem.send_keys(key)
     #"완료" 버튼
-    elem=driver.find_element(by=By.XPATH,value="/html/body/div[20]/div[4]/form/fieldset/div[3]/button")
+    elem=driver.find_element(by=By.XPATH,value="/html/body/div[18]/div[4]/form/fieldset/div[3]/button")
     elem.click()
     sleep(1)
     #"그룹이 생성되었습니다."
@@ -68,22 +68,22 @@ for index,data in df.iterrows():
     elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[7]/div[6]/div[7]/div[2]/div/div[6]/div/div/div[2]/div[3]/div/div[1]/a[1]")))
     elem.click()
     #그룹 선택
-    elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,f'/html/body/div[20]/div[2]/div[2]/ul/li[a/span[2]/strong/text()="{symbol}"]/a')))
+    elem=wait.until(method=EC.visibility_of_element_located(locator=(By.XPATH,f'/html/body/div[18]/div[2]/div[2]/ul/li[a/span[2]/strong/text()="{symbol}"]/a')))
     elem.click()
     #별명 입력
-    elem=driver.find_element(by=By.XPATH,value="/html/body/div[20]/div[3]/form/fieldset/div[2]/div[1]/input")
+    elem=driver.find_element(by=By.XPATH,value="/html/body/div[18]/div[3]/form/fieldset/div[2]/div[1]/input")
     elem.click()
     elem.clear()
     elem.send_keys(text)
     #색상 선택 버튼
-    elem=driver.find_element(by=By.XPATH,value=f"/html/body/div[20]/div[3]/form/fieldset/div[2]/ul/li[{fill_idx}]/input")
+    elem=driver.find_element(by=By.XPATH,value=f"/html/body/div[18]/div[3]/form/fieldset/div[2]/ul/li[{fill_idx}]/input")
     elem.click()
     #"완료" 버튼
-    elem=driver.find_element(by=By.XPATH,value="/html/body/div[20]/div[3]/form/fieldset/div[3]/button")
+    elem=driver.find_element(by=By.XPATH,value="/html/body/div[18]/div[3]/form/fieldset/div[3]/button")
     elem.click()
     #"즐겨찾기가 저장되었습니다."
     try:
-        elem=wait_x.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[20]/div[7]/div[2]/a")))
+        elem=wait_x.until(method=EC.visibility_of_element_located(locator=(By.XPATH,"/html/body/div[18]/div[7]/div[2]/a")))
     except:
         pass
     else:
