@@ -1,3 +1,4 @@
+from io import StringIO
 import pandas as pd
 import pygmt
 
@@ -14,4 +15,21 @@ fig.plot(x=df["longitude"],y=df["latitude"],size=0.05*df["magnitude"],cmap=True,
 fig.plot(x=[129.05,129.9],y=[35.55,37],pen="blue")
 fig.text(x=129.9,y=37.1,text="prob11",justify="LB")
 fig.colorbar(frame=[5,"x+ldepth(km)"],position="JCB+w5c")
+
+#legend
+legend_spec=StringIO(initial_value="""
+H 7p magnitude
+S 0.4c c 0.1c - ,, 0.7c 2
+G 0.05c
+S 0.4c c 0.15c - ,, 0.7c 3
+G 0.05c
+S 0.4c c 0.2c - ,, 0.7c 4
+G 0.05c
+S 0.4c c 0.25c - ,, 0.7c 5
+G 0.05c
+S 0.4c c 0.3c - ,, 0.7c 6
+""")
+with pygmt.config(FONT_ANNOT_PRIMARY="7p"):
+    fig.legend(spec=legend_spec,position="JRM+w1.5c+o0.2c/0c")
+
 fig.savefig(fname="prob9.png")
