@@ -1,3 +1,4 @@
+from io import StringIO
 import pandas as pd
 import pygmt
 
@@ -33,4 +34,19 @@ region[2:]=pygmt.info(data=profile[1],nearest_multiple=5)[:2]
 fig.shift_origin(yshift=f"-{y_shift}c")
 fig.plot(x=profile[0],y=profile[1],size=0.05*profile[2],frame=["WrS","x0.5","x+ldistance(@.)","ya10f5","y+ldepth(km)"],projection=f"xy/6c/-{depth_scale}c",region=region,style="cc",pen="red")
 fig.plot(x=profile_big[0],y=profile_big[1],size=0.05*profile_big[2],style="cc",pen="black")
+
+#legend
+legend_spec=StringIO(initial_value="""
+N 5
+S - c 0.1c - ,, 0.4c 2
+S - c 0.15c - ,, 0.4c 3
+S - c 0.2c - ,, 0.4c 4
+S - c 0.25c - ,, 0.4c 5
+S - c 0.3c - ,, 0.4c 6
+N
+G 0.1c
+L 7p C magnitude
+""")
+fig.legend(spec=legend_spec,position="JCB+w4c+o0c/1c")
+
 fig.savefig(fname="prob11.png")
