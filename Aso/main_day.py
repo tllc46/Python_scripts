@@ -260,7 +260,7 @@ def calc_cohrnc(idx_avg_day):
     elif method_cohrnc=="avg":
         cov_avg_diag[:,:nsta_day]=np.real(val=np.diagonal(a=cov_avg[:,:nsta_day,:nsta_day],axis1=1,axis2=2))
         cov_avg[:,:nsta_day,:nsta_day]/=np.sqrt(cov_avg_diag[:,:nsta_day,None]*cov_avg_diag[:,None,:nsta_day])
-        cohrnc_day[:,idx_avg_day]=np.nanmean(a=abs(cov_avg[:,idx_triu_day[0],idx_triu_day[1]]),axis=1)
+        cohrnc_day[:,idx_avg_day]=np.nanmean(a=abs(cov_avg[:,idx_triu_day[0],idx_triu_day[1]]),axis=1) #"nan"mean: gap은 아니지만, 0만으로 이루어진 data가 있다면, 0으로 나누어져 nan 발생
     elif method_cohrnc=="eig":
         eig_val[:,:nsta_day]=eigvalsh(a=cov_avg[:,:nsta_day,:nsta_day])
         cohrnc_day[:,idx_avg_day]=np.sum(a=np.arange(start=nsta_day-1,stop=-1,step=-1)*eig_val[:,:nsta_day],axis=1)
