@@ -20,22 +20,28 @@ nsta=len(df)
 ntriu=nsta*(nsta-1)//2
 
 grid=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/grid.npz")
+idx_topo=grid["idx_topo"] #(lon,lat)
 num=grid["num"] #(lon,lat,dep)
 nnode=np.prod(a=num)
 
-travel_times=np.empty(shape=(nsta,nnode))
-diff_travel_times=np.empty(shape=nnode)
+travel_times=np.empty(shape=(nsta,num[0],num[1],num[2]))
+diff_travel_times=np.empty(shape=num)
+idx_dtt_pair=np.empty(shape=num,dtype=int)
 idx_dtt=np.empty(shape=(ntriu,nnode),dtype=int)
 
 for i in range(nsta):
     stnm=df.loc[i,"stnm"]
-    travel_times_flat=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/"+stnm+".npz") #(lon,lat,dep)
-    travel_times[i,:]=travel_times_flat["travel_times"].flatten() #(nnode,)
+    travel_times_single=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[1]+"/"+stnm+".npz")
+    travel_times[i,:,:,:]=travel_times_single["travel_times"] #(lon,lat,dep)
 
 for i in range(nsta):
     for j in range(i+1,nsta):
         idx_triu=i*(nsta-1)-i*(i+1)//2+(j-1)
-        diff_travel_times[:]=travel_times[i]-travel_times[j]
-        idx_dtt[idx_triu,:]=np.round(a=sampling_rate*diff_travel_times).astype(dtype=int)
+        diff_travel_times[:,:,:]=travel_times[i]-travel_times[j]
+        idx_dtt_pair[:,:,:]=np.round(a=sampling_rate*diff_travel_times).astype(dtype=int)
+        for k in range(num[0]): #lon
+            for l in range(num[1]): #lat
+                idx_dtt_pair[k,l,:idx_topo[k,l]]=idx_dtt_pair[k,l,idx_topo[k,l]]
+        idx_dtt[idx_triu,:]=idx_dtt_pair.flatten()
 
 np.savez(file=path_save,idx_dtt=idx_dtt)
