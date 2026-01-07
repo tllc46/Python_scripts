@@ -337,7 +337,7 @@ def calc_day(idx_day):
         print_status(idx_avg=idx_avg)
 
     if calc_type=="cohrnc":
-        cohrnc[:,idx_day]=np.nanmean(a=cohrnc_day,axis=1) #"nan"mean: gap은 아니지만, 0만으로 이루어진 data가 있다면, 0으로 나누어져 nan 발생
+        cohrnc[:,idx_day]=np.mean(a=cohrnc_day,axis=1)
     elif calc_type=="xcorr":
         xcorr[idx_day,idx_flat_day,:]=np.nanmean(a=xcorr_day[:,idx_flat_day],axis=0) #"nan"mean: gap은 아니지만, 0만으로 이루어진 data가 있다면, 0으로 나누어져 nan 발생
         xcorr[idx_day,~idx_flat_day,:]=np.nan
