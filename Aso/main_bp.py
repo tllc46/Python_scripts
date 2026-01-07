@@ -26,10 +26,10 @@ sampling_rate=100 #[Hz]
 
 #velocity grid
 grid=np.load(file="/home/tllc46/48NAS1/tllc46/Aso/vel/"+sys.argv[3]+"/grid.npz")
-idx_flat=grid["idx"].flatten() #(lon,lat,dep) → (nnode,)
+idx=grid["idx"] #(lon,lat,dep)
 num=grid["num"] #(lon,lat,dep)
 nnode=np.prod(a=num)
-nnode_eff=sum(idx_flat)
+idx_flat=idx.flatten() #(nnode,)
 
 #day
 mdl_t.init(str_date=sys.argv[5])
@@ -75,9 +75,12 @@ if bool_fltr:
 #array
 xcorr_pair=np.empty(shape=npts_sub)
 beam=np.empty(shape=nnode)
+beam_3d=np.empty(shape=num)
 idx_loc=np.empty(shape=(3,navg),dtype=int)
-percentage=np.empty(shape=navg)
 nrf=np.empty(shape=navg)
+beam_lon=np.empty(shape=(num[0],navg))
+beam_lat=np.empty(shape=(num[1],navg))
+beam_dep=np.empty(shape=(num[2],navg))
 
 #saving directory
 path_save="/home/tllc46/48NAS1/tllc46/Aso/"+sys.argv[1]+"/loc"
@@ -89,8 +92,7 @@ if isfile(path=path_save):
     exit()
 
 def beamform(idx_avg_unit):
-    global xcorr_pair,beam
-    nstack=0
+    global xcorr_pair,beam,beam_3d
     beam[:]=0
 
     for i in range(ntriu):
@@ -107,15 +109,19 @@ def beamform(idx_avg_unit):
             xcorr_pair/=max(xcorr_pair)
 
         beam+=xcorr_pair[idx_dtt[i]]
-        nstack+=1
 
+    beam_3d[:,:,:]=np.reshape(beam,shape=num)
     beam[~idx_flat]=0
-    beam/=nstack
     idx_max=np.argmax(a=beam)
     beam/=beam[idx_max]
-    idx_loc[:,idx_avg]=np.unravel_index(indices=idx_max,shape=num)
-    percentage[idx_avg]=np.sum(a=0.98<=beam)/nnode_eff
+    beam_3d/=beam[idx_max]
+    idx_max=np.unravel_index(indices=idx_max,shape=num)
+    idx_loc[:,idx_avg]=idx_max
     nrf[idx_avg]=1/sum(beam)
+    beam_lon[:,idx_avg]=beam_3d[:,idx_max[1],idx_max[2]]
+    beam_lat[:,idx_avg]=beam_3d[idx_max[0],:,idx_max[2]]
+    beam_dep[:,idx_avg]=beam_3d[idx_max[0],idx_max[1]]
+    beam_dep[~idx[idx_max[0],idx_max[1]],idx_avg]=np.nan
 
 def calc_unit(navg_unit):
     global idx_avg
@@ -136,6 +142,6 @@ def main():
 
         calc_unit(navg_unit=navg_unit)
 
-    np.savez(file=path_save,idx_loc=idx_loc,percentage=percentage,nrf=nrf)
+    np.savez(file=path_save,idx_loc=idx_loc,nrf=nrf,beam_lon=beam_lon,beam_lat=beam_lat,beam_dep=beam_dep)
 
 main()
